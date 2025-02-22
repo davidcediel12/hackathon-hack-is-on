@@ -24,7 +24,7 @@ public class Asset {
     private String symbol;
     private Double quantity;
 
-    private Integer purchasedPrice;
+    private Double purchasedPrice;
 
     @ManyToOne
     private Wallet wallet;

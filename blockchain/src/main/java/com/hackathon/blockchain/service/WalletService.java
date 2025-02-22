@@ -11,6 +11,7 @@ import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,7 +67,7 @@ public class WalletService {
                 liquidityWallet.setNetWorth(0.0);
                 walletRepository.save(liquidityWallet);
 
-                Asset asset = new Asset(null, symbol, initialQuantity, 0, liquidityWallet);
+                Asset asset = new Asset(null, symbol, initialQuantity, 0.0, liquidityWallet);
                 assetRepository.save(asset);
 
                 liquidityWallet.getAssets().add(asset);
@@ -102,8 +103,8 @@ public class WalletService {
             }
 
             userWallet.setBalance(userWallet.getBalance() - totalCost);
-            updateWalletAssets(userWallet, USDT, quantity);
-            updateWalletAssets(usdtLiquidityWallet, USDT, -quantity);
+            updateWalletAssets(userWallet, USDT, quantity, price);
+            updateWalletAssets(usdtLiquidityWallet, USDT, -quantity, price);
 
             walletRepository.save(userWallet);
             walletRepository.save(usdtLiquidityWallet);
@@ -120,11 +121,11 @@ public class WalletService {
             return "❌ Insufficient USDT balance! You must buy USDT first.";
         }
 
-        updateWalletAssets(userWallet, USDT, -totalCost);
-        updateWalletAssets(usdtLiquidityWallet, USDT, totalCost);
+        updateWalletAssets(userWallet, USDT, -totalCost, price);
+        updateWalletAssets(usdtLiquidityWallet, USDT, totalCost, price);
 
-        updateWalletAssets(userWallet, symbol, quantity);
-        updateWalletAssets(liquidityWallet, symbol, -quantity);
+        updateWalletAssets(userWallet, symbol, quantity, price);
+        updateWalletAssets(liquidityWallet, symbol, -quantity, price);
 
         walletRepository.save(userWallet);
         walletRepository.save(liquidityWallet);
@@ -168,8 +169,8 @@ public class WalletService {
             }
 
             userWallet.setBalance(userWallet.getBalance() + totalRevenue);
-            updateWalletAssets(userWallet, symbol, -quantity);
-            updateWalletAssets(liquidityWallet, symbol, quantity);
+            updateWalletAssets(userWallet, symbol, -quantity, price);
+            updateWalletAssets(liquidityWallet, symbol, quantity, price);
 
         } else {
             // CASO 2: Venta de otros assets (Recibo USDT)
@@ -185,10 +186,10 @@ public class WalletService {
                 return "❌ Not enough USDT in liquidity pool!";
             }
 
-            updateWalletAssets(userWallet, USDT, totalRevenue);
-            updateWalletAssets(userWallet, symbol, -quantity);
-            updateWalletAssets(usdtLiquidityWallet, USDT, -totalRevenue);
-            updateWalletAssets(liquidityWallet, symbol, quantity);
+            updateWalletAssets(userWallet, USDT, totalRevenue, price);
+            updateWalletAssets(userWallet, symbol, -quantity, price);
+            updateWalletAssets(usdtLiquidityWallet, USDT, -totalRevenue, price);
+            updateWalletAssets(liquidityWallet, symbol, quantity, price);
 
             walletRepository.save(usdtLiquidityWallet);
         }
@@ -204,7 +205,8 @@ public class WalletService {
     /*
      * Esta versión ya no almacena purchasePrice en Assets
      */
-    private void updateWalletAssets(Wallet wallet, String assetSymbol, double amount) {
+    private void updateWalletAssets(Wallet wallet, String assetSymbol, double amount,
+                                    double purchasedPrice) {
         Optional<Asset> assetOpt = wallet.getAssets().stream()
                 .filter(asset -> asset.getSymbol().equalsIgnoreCase(assetSymbol))
                 .findFirst();
@@ -215,13 +217,27 @@ public class WalletService {
             if (asset.getQuantity() <= 0) {
                 wallet.getAssets().remove(asset);
             }
+
+            if (amount > 0) {
+                asset.setPurchasedPrice(getNewPurchasedPrice(amount, purchasedPrice, asset));
+            }
+
         } else if (amount > 0) {
             Asset newAsset = new Asset();
             newAsset.setSymbol(assetSymbol);
             newAsset.setQuantity(amount);
             newAsset.setWallet(wallet);
+            newAsset.setPurchasedPrice(purchasedPrice);
+
+            assetRepository.save(newAsset);
             wallet.getAssets().add(newAsset);
+
         }
+    }
+
+    private static double getNewPurchasedPrice(double amount, double purchasedPrice, Asset asset) {
+        return (asset.getPurchasedPrice() * asset.getQuantity() + purchasedPrice * amount) /
+                (asset.getQuantity() + amount);
     }
 
     private void recordTransaction(Wallet sender, Wallet receiver, String assetSymbol, double quantity, double price, String type) {
@@ -258,7 +274,9 @@ public class WalletService {
         Wallet wallet = new Wallet();
         wallet.setUser(user);
         wallet.setAddress(generateWalletAddress());
-        wallet.setBalance(100000.0);
+        double initialAmount = 100000.0;
+        wallet.setBalance(initialAmount);
+        wallet.setNetWorth(initialAmount);
         wallet.setAccountStatus(ACTIVE_STATUS);
 
         walletRepository.save(wallet);
@@ -272,7 +290,7 @@ public class WalletService {
 
 
     // Ejecuto esta función para tener patrimonios de carteras actualizados continuamente y que no contenga valores estáticos
-//    @Scheduled(fixedRate = 30000) // Se ejecuta cada 30 segundos
+    @Scheduled(fixedRate = 30000) // Se ejecuta cada 30 segundos
     @Transactional
     public void updateWalletBalancesScheduled() {
         log.info("🔄 Updating wallet net worths based on live market prices...");
