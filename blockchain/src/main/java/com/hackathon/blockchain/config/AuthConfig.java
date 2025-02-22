@@ -33,7 +33,9 @@ public class AuthConfig {
                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                                 .maximumSessions(1))
                 .logout(logout ->
-                        logout.deleteCookies("JSESSIONID"))
+                        logout
+                                .logoutUrl("/auth/logout")
+                                .deleteCookies("JSESSIONID"))
                 .httpBasic(Customizer.withDefaults());
 
 
