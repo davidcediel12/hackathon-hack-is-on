@@ -1,9 +1,7 @@
 package com.hackathon.blockchain.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 
@@ -14,6 +12,7 @@ import java.util.Set;
 public class Wallet {
 
     @Id
+    @GeneratedValue
     private Long id;
 
     @Column(nullable = false, unique = true, updatable = false)
