@@ -2,7 +2,7 @@ package com.hackathon.blockchain.controller;
 
 
 import com.hackathon.blockchain.dto.GenericResponse;
-import com.hackathon.blockchain.dto.request.AssetPurchaseRequest;
+import com.hackathon.blockchain.dto.request.AssetOperationRequest;
 import com.hackathon.blockchain.dto.response.WalletKeyGenerationResponse;
 import com.hackathon.blockchain.service.WalletService;
 import com.hackathon.blockchain.service.wallet.WalletServiceAdapter;
@@ -41,8 +41,16 @@ public class WalletController {
 
     @PostMapping("/buy")
     public ResponseEntity<GenericResponse> buyAsset(Authentication authentication,
-                                                    @Valid @RequestBody AssetPurchaseRequest purchaseRequest) {
+                                                    @Valid @RequestBody AssetOperationRequest purchaseRequest) {
 
         return ResponseEntity.ok(walletServiceAdapter.purchaseAsset(authentication.getName(), purchaseRequest));
+    }
+
+
+    @PostMapping("/sell")
+    public ResponseEntity<GenericResponse> sellAsset(Authentication authentication,
+                                                     @Valid @RequestBody AssetOperationRequest sellRequest) {
+
+        return ResponseEntity.ok(walletServiceAdapter.sellAsset(authentication.getName(), sellRequest));
     }
 }

@@ -1,7 +1,7 @@
 package com.hackathon.blockchain.service.wallet.impl;
 
 import com.hackathon.blockchain.dto.GenericResponse;
-import com.hackathon.blockchain.dto.request.AssetPurchaseRequest;
+import com.hackathon.blockchain.dto.request.AssetOperationRequest;
 import com.hackathon.blockchain.dto.response.WalletKeyGenerationResponse;
 import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.User;
@@ -59,14 +59,28 @@ public class WalletServicesAdapterImpl implements WalletServiceAdapter {
     }
 
     @Override
-    public GenericResponse purchaseAsset(String username, AssetPurchaseRequest purchaseRequest) {
+    public GenericResponse purchaseAsset(String username, AssetOperationRequest purchaseRequest) {
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> ApiException.USER_NOT_FOUND);
+        User user = getUser(username);
 
         String message = walletService.buyAsset(user.getId(), purchaseRequest.symbol(), purchaseRequest.quantity());
 
         return new GenericResponse(message);
+    }
+
+    @Override
+    public GenericResponse sellAsset(String username, AssetOperationRequest purchaseRequest) {
+
+        User user = getUser(username);
+
+        String message = walletService.sellAsset(user.getId(), purchaseRequest.symbol(), purchaseRequest.quantity());
+
+        return new GenericResponse(message);
+    }
+
+    private User getUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> ApiException.USER_NOT_FOUND);
     }
 
 }

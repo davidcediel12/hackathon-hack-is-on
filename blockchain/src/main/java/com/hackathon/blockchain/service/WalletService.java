@@ -216,6 +216,7 @@ public class WalletService {
             asset.setQuantity(asset.getQuantity() + amount);
             if (asset.getQuantity() <= 0) {
                 wallet.getAssets().remove(asset);
+                assetRepository.delete(asset);
             }
 
             if (amount > 0) {
