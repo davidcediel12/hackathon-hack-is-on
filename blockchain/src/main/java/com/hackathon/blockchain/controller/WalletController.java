@@ -2,13 +2,16 @@ package com.hackathon.blockchain.controller;
 
 
 import com.hackathon.blockchain.dto.GenericResponse;
+import com.hackathon.blockchain.dto.request.AssetPurchaseRequest;
 import com.hackathon.blockchain.dto.response.WalletKeyGenerationResponse;
 import com.hackathon.blockchain.service.WalletService;
 import com.hackathon.blockchain.service.wallet.WalletServiceAdapter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,5 +36,13 @@ public class WalletController {
     public ResponseEntity<WalletKeyGenerationResponse> generateKeys(Authentication authentication) {
 
         return ResponseEntity.ok(walletServiceAdapter.generateWalletKeys(authentication.getName()));
+    }
+
+
+    @PostMapping("/buy")
+    public ResponseEntity<GenericResponse> buyAsset(Authentication authentication,
+                                                    @Valid @RequestBody AssetPurchaseRequest purchaseRequest) {
+
+        return ResponseEntity.ok(walletServiceAdapter.purchaseAsset(authentication.getName(), purchaseRequest));
     }
 }
