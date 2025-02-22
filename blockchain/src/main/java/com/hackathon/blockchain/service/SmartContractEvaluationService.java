@@ -10,9 +10,9 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.security.PublicKey;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SmartContractEvaluationService {
@@ -32,7 +32,7 @@ public class SmartContractEvaluationService {
         this.walletService = walletService;
         this.walletKeyService = walletKeyService;
     }
-    
+
     /**
      * Verifica la firma digital del contrato usando la clave pública del emisor.
      */
@@ -43,17 +43,17 @@ public class SmartContractEvaluationService {
                 return false;
             }
             String dataToSign = contract.getName() +
-                                  contract.getConditionExpression() +
-                                  contract.getAction() +
-                                  contract.getActionValue() +
-                                  contract.getIssuerWalletId();
+                    contract.getConditionExpression() +
+                    contract.getAction() +
+                    contract.getActionValue() +
+                    contract.getIssuerWalletId();
             return SignatureUtil.verifySignature(dataToSign, contract.getDigitalSignature(), issuerPublicKey);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-    
+
     /**
      * Evalúa todos los smart contracts activos sobre las transacciones pendientes.
      * Se inyectan las variables "amount" y "txType" en el contexto de SpEL.
@@ -65,7 +65,7 @@ public class SmartContractEvaluationService {
     public void evaluateSmartContracts() {
         List<SmartContract> contracts = smartContractRepository.findAll(); // O filtrar por "ACTIVE"
         List<Transaction> pendingTxs = transactionRepository.findByStatus("PENDING");
-        
+
         for (Transaction tx : pendingTxs) {
             StandardEvaluationContext context = new StandardEvaluationContext();
             context.setVariable("amount", tx.getAmount());
@@ -99,24 +99,24 @@ public class SmartContractEvaluationService {
     //     List<SmartContract> contracts = smartContractRepository.findByStatus("ACTIVE");
     //     // Obtén todas las transacciones pendientes.
     //     List<Transaction> pendingTxs = transactionRepository.findByStatus("PENDING");
-        
+
     //     for (Transaction tx : pendingTxs) {
     //         // Creamos un contexto de evaluación y definimos variables que se puedan usar en la expresión.
     //         StandardEvaluationContext context = new StandardEvaluationContext();
     //         context.setVariable("amount", tx.getAmount());
     //         // Puedes inyectar otras variables según convenga.
-            
+
     //         for (SmartContract contract : contracts) {
     //             // Primero, verificar la firma del contrato.
     //             if (!verifyContractSignature(contract)) {
     //                 // Si la firma no es válida, se ignora este contrato.
     //                 continue;
     //             }
-                
+
     //             // Evaluar la condición del contrato usando SpEL.
     //             Expression exp = parser.parseExpression(contract.getConditionExpression());
     //             Boolean conditionMet = exp.getValue(context, Boolean.class);
-                
+
     //             if (conditionMet != null && conditionMet) {
     //                 // Si la condición se cumple y la acción es "TRANSFER_FEE", se ejecuta la transferencia.
     //                 if ("TRANSFER_FEE".equalsIgnoreCase(contract.getAction())) {
