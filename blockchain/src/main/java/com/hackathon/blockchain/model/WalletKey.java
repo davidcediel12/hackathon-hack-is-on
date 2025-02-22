@@ -3,8 +3,6 @@ package com.hackathon.blockchain.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,18 +11,8 @@ import lombok.Setter;
 @Setter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
-public class Asset {
+public class WalletKey {
 
     @Id
     private Long id;
-
-    private String symbol;
-    private Double quantity;
-
-    private Double purchasedPrice;
-
-    @ManyToOne
-    private Wallet wallet;
-
 }
