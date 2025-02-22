@@ -1,5 +1,6 @@
 package com.hackathon.blockchain.service.authentication.impl;
 
+import com.hackathon.blockchain.dto.request.UserRegistration;
 import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.User;
 import com.hackathon.blockchain.repository.UserRepository;
@@ -31,13 +32,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Override
     @Transactional
-    public void registerUser(String email, String username, String password) {
+    public void registerUser(UserRegistration userRegistration) {
 
+        String encodedPassword = passwordEncoder.encode(userRegistration.password());
 
         User user = User.builder()
-                .email(email)
-                .username(username)
-                .password(passwordEncoder.encode(password))
+                .email(userRegistration.email())
+                .username(userRegistration.username())
+                .password(encodedPassword)
                 .build();
 
         userRepository.save(user);

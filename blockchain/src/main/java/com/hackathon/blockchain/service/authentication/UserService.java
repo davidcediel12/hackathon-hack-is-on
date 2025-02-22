@@ -1,6 +1,8 @@
 package com.hackathon.blockchain.service.authentication;
 
+import com.hackathon.blockchain.dto.request.UserRegistration;
+
 public interface UserService {
 
-    void registerUser(String email, String username, String password);
+    void registerUser(UserRegistration userRegistration);
 }
