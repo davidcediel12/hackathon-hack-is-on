@@ -17,7 +17,9 @@ import java.util.Date;
 public class Transaction {
 
     @Id
+    @GeneratedValue
     private Long id;
+
     @ManyToOne(optional = false)
     private Wallet senderWallet;
 

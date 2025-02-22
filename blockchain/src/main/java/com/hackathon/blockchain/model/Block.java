@@ -1,6 +1,7 @@
 package com.hackathon.blockchain.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jdk.jfr.Timestamp;
@@ -18,6 +19,7 @@ import java.util.Set;
 public class Block {
 
     @Id
+    @GeneratedValue
     private Long id;
 
     private Long blockIndex;
