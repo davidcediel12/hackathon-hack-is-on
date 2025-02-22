@@ -22,15 +22,15 @@ public class Block {
     }
 
     public String getBlockIndex() {
-        return null;
+        return null; // TODO change
     }
 
     public String getHash() {
-        return null;
+        return null; // TODO change
     }
 
     public String getPreviousHash() {
 
-        return null;
+        return null; // TODO change
     }
 }
