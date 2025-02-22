@@ -24,7 +24,8 @@ public class AuthConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests(requests ->
-                        requests.requestMatchers("/auth/register", "/auth/login", "/health").permitAll()
+                        requests.requestMatchers("/auth/register", "/auth/login", "/health",
+                                        "/market/**").permitAll()
                                 .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
