@@ -5,16 +5,19 @@ import com.hackathon.blockchain.model.Asset;
 import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.model.User;
 import com.hackathon.blockchain.model.Wallet;
+import com.hackathon.blockchain.repository.AssetRepository;
 import com.hackathon.blockchain.repository.TransactionRepository;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static com.hackathon.blockchain.utils.AssetConstants.USDT;
+import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 
 @Slf4j
 @Service
@@ -24,15 +27,17 @@ public class WalletService {
     private final TransactionRepository transactionRepository;
     private final MarketDataService marketDataService;
     private final UserRepository userRepository;
+    private final AssetRepository assetRepository;
 
     public WalletService(WalletRepository walletRepository,
                          TransactionRepository transactionRepository,
                          MarketDataService marketDataService,
-                         BlockchainService blockchainService, UserRepository userRepository) {
+                         BlockchainService blockchainService, UserRepository userRepository, AssetRepository assetRepository) {
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
         this.marketDataService = marketDataService;
         this.userRepository = userRepository;
+        this.assetRepository = assetRepository;
     }
 
     public Optional<Wallet> getWalletByUserId(Long userId) {
@@ -45,6 +50,7 @@ public class WalletService {
 
     @Transactional
     public void initializeLiquidityPools(Map<String, Double> initialAssets) {
+
         for (Map.Entry<String, Double> entry : initialAssets.entrySet()) {
             String symbol = entry.getKey();
             double initialQuantity = entry.getValue();
@@ -55,10 +61,14 @@ public class WalletService {
             if (existingWallet.isEmpty()) {
                 Wallet liquidityWallet = new Wallet();
                 liquidityWallet.setAddress(liquidityWalletAddress);
+                liquidityWallet.setAccountStatus(ACTIVE_STATUS);
                 liquidityWallet.setBalance(0.0);
+                liquidityWallet.setNetWorth(0.0);
                 walletRepository.save(liquidityWallet);
 
                 Asset asset = new Asset(null, symbol, initialQuantity, 0, liquidityWallet);
+                assetRepository.save(asset);
+
                 liquidityWallet.getAssets().add(asset);
             }
         }
@@ -86,32 +96,32 @@ public class WalletService {
         double price = marketDataService.fetchLivePriceForAsset(symbol);
         double totalCost = quantity * price;
 
-        if (symbol.equals("USDT")) {
+        if (symbol.equals(USDT)) {
             if (userWallet.getBalance() < totalCost) {
                 return "❌ Insufficient fiat balance to buy USDT!";
             }
 
             userWallet.setBalance(userWallet.getBalance() - totalCost);
-            updateWalletAssets(userWallet, "USDT", quantity);
-            updateWalletAssets(usdtLiquidityWallet, "USDT", -quantity);
+            updateWalletAssets(userWallet, USDT, quantity);
+            updateWalletAssets(usdtLiquidityWallet, USDT, -quantity);
 
             walletRepository.save(userWallet);
             walletRepository.save(usdtLiquidityWallet);
 
-            recordTransaction(usdtLiquidityWallet, userWallet, "USDT", quantity, price, "BUY");
+            recordTransaction(usdtLiquidityWallet, userWallet, USDT, quantity, price, "BUY");
             return "✅ USDT purchased successfully!";
         }
 
         Optional<Asset> usdtAssetOpt = userWallet.getAssets().stream()
-                .filter(a -> a.getSymbol().equals("USDT"))
+                .filter(a -> a.getSymbol().equals(USDT))
                 .findFirst();
 
         if (usdtAssetOpt.isEmpty() || usdtAssetOpt.get().getQuantity() < totalCost) {
             return "❌ Insufficient USDT balance! You must buy USDT first.";
         }
 
-        updateWalletAssets(userWallet, "USDT", -totalCost);
-        updateWalletAssets(usdtLiquidityWallet, "USDT", totalCost);
+        updateWalletAssets(userWallet, USDT, -totalCost);
+        updateWalletAssets(usdtLiquidityWallet, USDT, totalCost);
 
         updateWalletAssets(userWallet, symbol, quantity);
         updateWalletAssets(liquidityWallet, symbol, -quantity);
@@ -152,8 +162,8 @@ public class WalletService {
         }
 
         // CASO 1: Venta de USDT (Recibo dinero fiat)
-        if (symbol.equals("USDT")) {
-            if (liquidityWallet.getAssets().stream().anyMatch(a -> a.getSymbol().equals("USDT") && a.getQuantity() < quantity)) {
+        if (symbol.equals(USDT)) {
+            if (liquidityWallet.getAssets().stream().anyMatch(a -> a.getSymbol().equals(USDT) && a.getQuantity() < quantity)) {
                 return "❌ Not enough USDT liquidity!";
             }
 
@@ -168,16 +178,16 @@ public class WalletService {
             Wallet usdtLiquidityWallet = usdtLiquidityWalletOpt.get();
 
             Optional<Asset> usdtAssetOpt = usdtLiquidityWallet.getAssets().stream()
-                    .filter(a -> a.getSymbol().equals("USDT"))
+                    .filter(a -> a.getSymbol().equals(USDT))
                     .findFirst();
 
             if (usdtAssetOpt.isEmpty() || usdtAssetOpt.get().getQuantity() < totalRevenue) {
                 return "❌ Not enough USDT in liquidity pool!";
             }
 
-            updateWalletAssets(userWallet, "USDT", totalRevenue);
+            updateWalletAssets(userWallet, USDT, totalRevenue);
             updateWalletAssets(userWallet, symbol, -quantity);
-            updateWalletAssets(usdtLiquidityWallet, "USDT", -totalRevenue);
+            updateWalletAssets(usdtLiquidityWallet, USDT, -totalRevenue);
             updateWalletAssets(liquidityWallet, symbol, quantity);
 
             walletRepository.save(usdtLiquidityWallet);
@@ -237,7 +247,7 @@ public class WalletService {
     public String createWalletForUser(String username) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ApiException("User not found", HttpStatus.INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> ApiException.USER_NOT_FOUND);
 
         Optional<Wallet> existingWallet = walletRepository.findByUserId(user.getId());
 
@@ -249,7 +259,7 @@ public class WalletService {
         wallet.setUser(user);
         wallet.setAddress(generateWalletAddress());
         wallet.setBalance(100000.0);
-        wallet.setAccountStatus("ACTIVE");
+        wallet.setAccountStatus(ACTIVE_STATUS);
 
         walletRepository.save(wallet);
 
@@ -377,7 +387,7 @@ public class WalletService {
         Wallet feeWallet = new Wallet();
         feeWallet.setAddress(feeWalletAddress);
         feeWallet.setBalance(0.0);
-        feeWallet.setAccountStatus("ACTIVE");
+        feeWallet.setAccountStatus(ACTIVE_STATUS);
         // Al no estar asociada a un usuario, se deja user en null
         walletRepository.save(feeWallet);
         return "Fee wallet created successfully with address: " + feeWalletAddress;

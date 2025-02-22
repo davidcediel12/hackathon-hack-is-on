@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 
 
 @Getter
-public class ApiException extends RuntimeException{
+public class ApiException extends RuntimeException {
+
+    public static final ApiException USER_NOT_FOUND = new ApiException("User not found", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final HttpStatus status;
 

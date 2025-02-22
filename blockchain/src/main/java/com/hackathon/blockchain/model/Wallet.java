@@ -3,6 +3,7 @@ package com.hackathon.blockchain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -32,5 +33,5 @@ public class Wallet {
     private Set<Transaction> receivedTransactions;
 
     @OneToMany(mappedBy = "wallet")
-    private Set<Asset> assets;
+    private Set<Asset> assets = new HashSet<>();
 }
