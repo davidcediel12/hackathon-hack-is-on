@@ -2,6 +2,7 @@ package com.hackathon.blockchain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +20,7 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
+    @GeneratedValue
     private Long id;
 
     @Column(nullable = false)
