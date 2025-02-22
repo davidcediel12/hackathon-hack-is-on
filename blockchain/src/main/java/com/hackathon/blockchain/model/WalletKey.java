@@ -1,10 +1,7 @@
 package com.hackathon.blockchain.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +20,8 @@ public class WalletKey {
     @OneToOne
     private Wallet wallet;
 
+    @Lob
     private String publicKey;
+    @Lob
     private String privateKey;
 }

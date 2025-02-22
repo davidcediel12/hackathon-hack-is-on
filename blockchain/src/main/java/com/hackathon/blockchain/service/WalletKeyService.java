@@ -4,36 +4,36 @@ import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.model.WalletKey;
 import com.hackathon.blockchain.repository.WalletKeyRepository;
 import com.hackathon.blockchain.utils.PemUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Optional;
 
+import static com.hackathon.blockchain.utils.WalletConstants.KEYS_FOLDER;
+
 @Service
+@Slf4j
 public class WalletKeyService {
 
-    private static final String KEYS_FOLDER = "keys";
+
     private final WalletKeyRepository walletKeyRepository;
 
-    public WalletKeyService(WalletKeyRepository walletKeyRepository) throws IOException {
+    public WalletKeyService(WalletKeyRepository walletKeyRepository) {
         this.walletKeyRepository = walletKeyRepository;
         // Asegurarse de que la carpeta /keys exista
         File dir = new File(KEYS_FOLDER);
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        System.out.println("Directorio de claves: " + dir.getAbsolutePath());
+        log.debug("Directorio de claves: {}", dir.getAbsolutePath());
     }
 
     public Optional<WalletKey> getKeysByWallet(Wallet wallet) {
@@ -55,8 +55,8 @@ public class WalletKeyService {
         KeyPair keyPair = keyGen.generateKeyPair();
 
         // Convertir las claves a formato PEM
-        String publicKeyPEM = PemUtil.toPEMFormat(keyPair.getPublic(), "PUBLIC");
-        String privateKeyPEM = PemUtil.toPEMFormat(keyPair.getPrivate(), "PRIVATE");
+        String publicKeyPEM = PemUtil.toPEMFormat(keyPair.getPublic());
+        String privateKeyPEM = PemUtil.toPEMFormat(keyPair.getPrivate());
 
         // Guardar las claves en archivos dentro de la carpeta /keys
         Path privateKeyPath = Path.of(KEYS_FOLDER, "wallet_" + wallet.getId() + "_private.pem");
