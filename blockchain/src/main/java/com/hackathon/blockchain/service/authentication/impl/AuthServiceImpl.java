@@ -8,6 +8,8 @@ import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.User;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.service.authentication.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,18 +34,20 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityContextRepository securityContextRepository;
 
     @Override
-    public void login(UserLogin login) {
+    public void login(UserLogin login, HttpServletRequest request, HttpServletResponse response) {
 
-        authenticateUser(login.username(), login.password());
+        authenticateUser(login.username(), login.password(), request, response);
 
     }
 
 
     @Transactional
     @Override
-    public void registerUser(UserRegistration userRegistration) {
+    public void registerUser(UserRegistration userRegistration,
+                             HttpServletRequest request, HttpServletResponse response) {
 
 
         if (userRepository.existsByUsername(userRegistration.username())) {
@@ -58,14 +65,20 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        authenticateUser(user.getUsername(), userRegistration.password());
+        authenticateUser(user.getUsername(), userRegistration.password(), request, response);
     }
 
 
-    private void authenticateUser(String username, String password) {
+    private void authenticateUser(String username, String password,
+                                  HttpServletRequest request, HttpServletResponse response) {
         try {
-            authenticationManager.authenticate(
+            Authentication authentication = authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken.unauthenticated(username, password));
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authentication);
+            securityContextRepository.saveContext(context, request, response);
+
         } catch (AuthenticationException e) {
             log.warn("Invalid credentials", e);
             throw new ApiException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
