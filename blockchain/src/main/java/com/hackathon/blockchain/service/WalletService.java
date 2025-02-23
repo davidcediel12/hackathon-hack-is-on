@@ -9,6 +9,8 @@ import com.hackathon.blockchain.repository.AssetRepository;
 import com.hackathon.blockchain.repository.TransactionRepository;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
+import com.hackathon.blockchain.service.contract.SmartContractEvaluationService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class WalletService {
 
     private final WalletRepository walletRepository;
@@ -31,17 +34,7 @@ public class WalletService {
     private final MarketDataService marketDataService;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
-
-    public WalletService(WalletRepository walletRepository,
-                         TransactionRepository transactionRepository,
-                         MarketDataService marketDataService,
-                         BlockchainService blockchainService, UserRepository userRepository, AssetRepository assetRepository) {
-        this.walletRepository = walletRepository;
-        this.transactionRepository = transactionRepository;
-        this.marketDataService = marketDataService;
-        this.userRepository = userRepository;
-        this.assetRepository = assetRepository;
-    }
+    private final SmartContractEvaluationService smartContractEvaluationService;
 
     public Optional<Wallet> getWalletByUserId(Long userId) {
         return walletRepository.findByUserId(userId);
@@ -256,6 +249,7 @@ public class WalletService {
                 null              // block (aún no asignado)
         );
 
+        smartContractEvaluationService.evaluateSmartContracts(transaction);
         transactionRepository.save(transaction);
     }
 
@@ -384,33 +378,5 @@ public class WalletService {
     // RETO BACKEND
 
     // Método para transferir el fee: deducirlo del wallet del emisor y sumarlo a la wallet de fees.
-    public void transferFee(Transaction tx, double fee) {
-        Wallet sender = tx.getSenderWallet();
-        // Supongamos que el liquidity pool de USDT (o la wallet designada para fees) tiene ID 2.
-        Optional<Wallet> feeWalletOpt = walletRepository.findByAddress("FEES-USDT");
-        if (feeWalletOpt.isPresent()) {
-            Wallet feeWallet = feeWalletOpt.get();
-            // Actualiza los balances:
-            sender.setBalance(sender.getBalance() - fee);
-            feeWallet.setBalance(feeWallet.getBalance() + fee);
-            walletRepository.save(sender);
-            walletRepository.save(feeWallet);
-        }
-    }
 
-    // Método para crear una wallet para fees (solo USDT)
-    public String createFeeWallet() {
-        String feeWalletAddress = "FEES-USDT";
-        Optional<Wallet> existing = walletRepository.findByAddress(feeWalletAddress);
-        if (existing.isPresent()) {
-            return "Fee wallet already exists with address: " + feeWalletAddress;
-        }
-        Wallet feeWallet = new Wallet();
-        feeWallet.setAddress(feeWalletAddress);
-        feeWallet.setBalance(0.0);
-        feeWallet.setAccountStatus(ACTIVE_STATUS);
-        // Al no estar asociada a un usuario, se deja user en null
-        walletRepository.save(feeWallet);
-        return "Fee wallet created successfully with address: " + feeWalletAddress;
-    }
 }

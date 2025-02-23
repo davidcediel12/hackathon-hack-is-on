@@ -6,6 +6,7 @@ import com.hackathon.blockchain.service.BlockchainService;
 import com.hackathon.blockchain.service.WalletKeyService;
 import com.hackathon.blockchain.service.WalletService;
 import com.hackathon.blockchain.service.contract.ContractService;
+import com.hackathon.blockchain.service.transaction.FeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -31,24 +32,28 @@ public class BlockchainApplication {
                                     BlockchainService blockchainService,
                                     WalletKeyService walletKeyService,
                                     ContractService contractService,
-                                    SmartContractRepository smartContractRepository) {
+                                    SmartContractRepository smartContractRepository,
+                                    FeeService feeService) {
 
         return appArgs -> {
             log.info("Initializing liquidity pools");
             walletService.initializeLiquidityPools(INITIAL_LIQUIDITY_POOL);
+            log.info(feeService.createFeeWallet());
             log.info("Liquidity pool initialized");
             blockchainService.createGenesisBlock();
 
             walletService.getWalletByAddress("LP-BTC").ifPresent(wallet -> {
                 try {
-                    if(walletKeyService.getKeysByWallet(wallet).isEmpty()) {
+                    if (walletKeyService.getKeysByWallet(wallet).isEmpty()) {
                         walletKeyService.generateAndStoreKeys(wallet);
                     }
                 } catch (Exception e) {
                     log.error("Error creating the key for BTC wallet", e);
                 }
 
-                if (smartContractRepository.existsByIssuerWalletId(wallet.getId())) {
+                Boolean contractAlreadyExists = smartContractRepository.existsByIssuerWalletId(wallet.getId());
+
+                if (Boolean.TRUE.equals(contractAlreadyExists)) {
                     return;
                 }
 
