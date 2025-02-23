@@ -80,24 +80,28 @@ public class WalletKeyService {
     // Método para obtener la clave pública de una wallet (en formato PublicKey)
     public PublicKey getPublicKeyForWallet(Long walletId) {
         Optional<WalletKey> keyOpt = walletKeyRepository.findByWalletId(walletId);
-        if (keyOpt.isPresent()) {
-            String publicKeyPEM = keyOpt.get().getPublicKey();
-            try {
-                // Elimina encabezados, pies y saltos de línea
-                String publicKeyContent = publicKeyPEM
-                        .replace("-----BEGIN PUBLIC KEY-----", "")
-                        .replace("-----END PUBLIC KEY-----", "")
-                        .replaceAll("\\s", "");
-                byte[] decoded = Base64.getDecoder().decode(publicKeyContent);
-                X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                return keyFactory.generatePublic(keySpec);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+
+        if (keyOpt.isEmpty()) {
+            return null;
         }
-        return null;
+
+
+        String publicKeyPEM = keyOpt.get().getPublicKey();
+        try {
+            // Elimina encabezados, pies y saltos de línea
+            String publicKeyContent = publicKeyPEM
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s", "");
+            byte[] decoded = Base64.getDecoder().decode(publicKeyContent);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePublic(keySpec);
+        } catch (Exception e) {
+            log.error("Error obtaining the public key", e);
+            return null;
+        }
+
     }
 
     /**

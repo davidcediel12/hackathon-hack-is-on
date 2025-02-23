@@ -2,6 +2,7 @@ package com.hackathon.blockchain.service.contract.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hackathon.blockchain.dto.GenericResponse;
 import com.hackathon.blockchain.dto.request.Contract;
 import com.hackathon.blockchain.dto.response.ContractResponse;
 import com.hackathon.blockchain.exception.ApiException;
@@ -54,7 +55,47 @@ public class ContractServiceImpl implements ContractService {
             throw e;
         } catch (Exception e) {
 
-            String message = "Something went wrong while creating contract";
+            String message = "Something went wrong while creating the contract";
+            log.error(message, e);
+            throw new ApiException(message, e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+
+    @Override
+    public GenericResponse validateContract(Long contractId) {
+
+        SmartContract contract = smartContractRepository.findById(contractId)
+                .orElseThrow(() -> new ApiException("Contract not found", HttpStatus.NOT_FOUND));
+
+        try {
+            String contractData = objectMapper.writeValueAsString(contract.toDto());
+
+            PublicKey publicKey = walletKeyService.getPublicKeyForWallet(contract.getIssuerWalletId());
+
+            if (publicKey == null) {
+                throw new ApiException(WALLET_NOT_FOUND, HttpStatus.BAD_REQUEST);
+            }
+
+            Signature publicSignature = Signature.getInstance("SHA256withRSA");
+            publicSignature.initVerify(publicKey);
+            publicSignature.update(contractData.getBytes(StandardCharsets.UTF_8));
+
+
+            byte[] signature = Base64.getDecoder().decode(contract.getDigitalSignature());
+
+            boolean isCorrect = publicSignature.verify(signature);
+
+            if (isCorrect) {
+                return new GenericResponse("Smart contract is valid");
+            }
+
+            return new GenericResponse("Smart contract is invalid");
+        } catch (ApiException e) {
+            throw e;
+        } catch (Exception e) {
+            String message = "Something went wrong while validating the contract";
             log.error(message, e);
             throw new ApiException(message, e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
