@@ -34,7 +34,7 @@ public class AuthConfig {
 
         http.authorizeHttpRequests(requests ->
                         requests.requestMatchers("/auth/register", "/auth/login", "/health",
-                                        "/market/**").permitAll()
+                                        "/market/**", "/blockchain/**").permitAll()
                                 .requestMatchers("/auth/logout").authenticated()
                                 .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
