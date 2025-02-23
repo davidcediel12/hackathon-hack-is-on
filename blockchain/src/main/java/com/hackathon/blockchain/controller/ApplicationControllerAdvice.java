@@ -14,8 +14,12 @@ public class ApplicationControllerAdvice {
     public ResponseEntity<Object> handleApiException(ApiException apiException) {
 
         if (apiException.getResponseBody() == null) {
-            return new ResponseEntity<>(
-                    new GenericResponse(apiException.getMessage()), apiException.getStatus());
+
+            if(apiException.getMessage() != null) {
+                return new ResponseEntity<>(
+                        new GenericResponse(apiException.getMessage()), apiException.getStatus());
+            }
+            return new ResponseEntity<>(apiException.getStatus());
         }
 
         return new ResponseEntity<>(apiException.getResponseBody(), apiException.getStatus());
