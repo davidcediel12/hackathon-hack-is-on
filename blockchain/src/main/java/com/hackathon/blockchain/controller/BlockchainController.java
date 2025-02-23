@@ -28,7 +28,12 @@ public class BlockchainController {
 
     @GetMapping
     public ResponseEntity<List<BlockDto>> getBlockchain(){
-
         return ResponseEntity.ok(blockchainService.getBlockchain());
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<GenericResponse> validate(){
+        GenericResponse validityMessage = new GenericResponse("Blockchain valid: " + blockchainService.isChainValid());
+        return ResponseEntity.ok(validityMessage);
     }
 }
