@@ -1,6 +1,5 @@
 package com.hackathon.blockchain.model;
 
-import com.hackathon.blockchain.dto.request.Contract;
 import com.hackathon.blockchain.dto.response.ContractResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,17 +28,12 @@ public class SmartContract {
     private String digitalSignature;
     private String status;
 
-    public String getDataToSign(){
+    public String getDataToSign() {
         return name + conditionExpression + action + actionValue + issuerWalletId;
     }
 
-    public ContractResponse toResponse(){
+    public ContractResponse toResponse() {
         return new ContractResponse(name, conditionExpression,
                 action, actionValue, issuerWalletId, digitalSignature);
     }
-
-    public Contract toDto(){
-        return new Contract(name, conditionExpression, action, actionValue, issuerWalletId);
-    }
-
 }

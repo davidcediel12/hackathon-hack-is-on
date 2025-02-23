@@ -40,10 +40,6 @@ public class WalletKeyService {
         return walletKeyRepository.findByWallet(wallet);
     }
 
-    public Optional<WalletKey> getKeysByWalletId(Long walletId) {
-        return walletKeyRepository.findByWalletId(walletId);
-    }
-
     /**
      * Genera un par de claves RSA de 2048 bits, las convierte a PEM y las almacena en archivos,
      * además de guardarlas en la base de datos vinculadas a la wallet.

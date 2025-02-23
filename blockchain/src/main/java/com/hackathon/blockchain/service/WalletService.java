@@ -38,9 +38,6 @@ public class WalletService {
     private final AssetRepository assetRepository;
     private final SmartContractEvaluationService smartContractEvaluationService;
 
-    public Optional<Wallet> getWalletByUserId(Long userId) {
-        return walletRepository.findByUserId(userId);
-    }
 
     public Optional<Wallet> getWalletByAddress(String address) {
         return walletRepository.findByAddress(address);
