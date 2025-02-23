@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -73,9 +74,9 @@ public class BlockchainServiceImpl implements BlockchainService {
 
         Block genesisBlock = Block.builder()
                 .blockIndex(0L)
-                .timestamp(LocalDateTime.now())
                 .isGenesis(true)
                 .previousHash("0")
+                .timestamp(new Date().getTime())
                 .build();
 
         findHashAndSaveBlock(genesisBlock);

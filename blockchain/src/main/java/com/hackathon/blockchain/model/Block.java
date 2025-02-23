@@ -1,11 +1,9 @@
 package com.hackathon.blockchain.model;
 
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
 import lombok.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -25,8 +23,7 @@ public class Block {
 
     private String previousHash;
 
-    @Timestamp
-    LocalDateTime timestamp;
+    Long timestamp;
 
     private Long nonce;
 
