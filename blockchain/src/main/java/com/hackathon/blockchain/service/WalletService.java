@@ -204,9 +204,7 @@ public class WalletService {
         return "✅ Asset sold successfully!";
     }
 
-    /*
-     * Esta versión ya no almacena purchasePrice en Assets
-     */
+
     private void updateWalletAssets(Wallet wallet, String assetSymbol, double amount,
                                     double purchasedPrice) {
         Optional<Asset> assetOpt = wallet.getAssets().stream()
