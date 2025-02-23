@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static com.hackathon.blockchain.utils.AssetConstants.USDT;
+import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
 import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 
 @Slf4j
@@ -86,7 +87,7 @@ public class WalletService {
         Optional<Wallet> liquidityWalletOpt = walletRepository.findByAddress("LP-" + symbol);
         Optional<Wallet> usdtLiquidityWalletOpt = walletRepository.findByAddress("LP-USDT");
 
-        if (optionalWallet.isEmpty()) return "❌ Wallet not found!";
+        if (optionalWallet.isEmpty()) return WALLET_NOT_FOUND;
         if (liquidityWalletOpt.isEmpty()) return "❌ Liquidity pool for " + symbol + " not found!";
         if (usdtLiquidityWalletOpt.isEmpty()) return "❌ Liquidity pool for USDT not found!";
 
@@ -145,7 +146,7 @@ public class WalletService {
         Optional<Wallet> optionalWallet = walletRepository.findByUserId(userId);
         Optional<Wallet> liquidityWalletOpt = walletRepository.findByAddress("LP-" + symbol);
 
-        if (optionalWallet.isEmpty()) return "❌ Wallet not found!";
+        if (optionalWallet.isEmpty()) return WALLET_NOT_FOUND;
         if (liquidityWalletOpt.isEmpty()) return "❌ Liquidity pool for " + symbol + " not found!";
 
         Wallet userWallet = optionalWallet.get();
@@ -368,7 +369,7 @@ public class WalletService {
     public Map<String, List<Transaction>> getWalletTransactions(Long walletId) {
         Optional<Wallet> walletOpt = walletRepository.findById(walletId);
         if (walletOpt.isEmpty()) {
-            return Map.of("error", List.of());
+            return Map.of("error", List.of()); // TODO Manage this error
         }
         Wallet wallet = walletOpt.get();
         List<Transaction> sentTransactions = transactionRepository.findBySenderWallet(wallet);
