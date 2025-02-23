@@ -1,16 +1,18 @@
 package com.hackathon.blockchain.model;
 
+import com.hackathon.blockchain.dto.response.ContractResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.Lob;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 public class SmartContract {
 
     @Id
@@ -22,6 +24,12 @@ public class SmartContract {
     private String action;
     private Double actionValue;
     private Long issuerWalletId;
+    @Lob
     private String digitalSignature;
+
+    public ContractResponse toResponse(){
+        return new ContractResponse(name, conditionExpression,
+                action, actionValue, issuerWalletId, digitalSignature);
+    }
 
 }

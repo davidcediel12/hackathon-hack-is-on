@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.Optional;
 
+import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
 import static com.hackathon.blockchain.utils.WalletConstants.KEYS_FOLDER;
 
 
@@ -39,13 +41,22 @@ public class WalletServicesAdapterImpl implements WalletServiceAdapter {
     public WalletKeyGenerationResponse generateWalletKeys(String username) {
 
         Wallet wallet = walletRepository.findByUser_Username(username)
-                .orElseThrow(() -> new ApiException("Wallet not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApiException(WALLET_NOT_FOUND, HttpStatus.NOT_FOUND));
+
 
         try {
-            WalletKey walletKey = walletKeyService.generateAndStoreKeys(wallet);
+            WalletKey walletKey;
+
+            Optional<WalletKey> walletKeyOpt = walletKeyService.getKeysByWallet(wallet);
+
+            if (walletKeyOpt.isPresent()) {
+                walletKey = walletKeyOpt.get();
+            } else {
+                walletKey = walletKeyService.generateAndStoreKeys(wallet);
+            }
 
             return new WalletKeyGenerationResponse(
-                    "Keys generated/retrieved successfully for wallet id:" + wallet.getId(),
+                    "Keys generated/retrieved successfully for wallet id: " + wallet.getId(),
                     walletKey.getPublicKey(),
                     Path.of(KEYS_FOLDER).toAbsolutePath().toString()
             );

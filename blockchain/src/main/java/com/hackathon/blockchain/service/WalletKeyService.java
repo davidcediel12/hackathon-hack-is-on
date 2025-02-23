@@ -105,22 +105,25 @@ public class WalletKeyService {
      */
     public PrivateKey getPrivateKeyForWallet(Long walletId) {
         Optional<WalletKey> keyOpt = walletKeyRepository.findByWalletId(walletId);
-        if (keyOpt.isPresent()) {
-            String privateKeyPEM = keyOpt.get().getPrivateKey();
-            try {
-                String privateKeyContent = privateKeyPEM
-                        .replace("-----BEGIN PRIVATE KEY-----", "")
-                        .replace("-----END PRIVATE KEY-----", "")
-                        .replaceAll("\\s", "");
-                byte[] decoded = Base64.getDecoder().decode(privateKeyContent);
-                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                return keyFactory.generatePrivate(keySpec);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+
+        if (keyOpt.isEmpty()) {
+            return null;
         }
-        return null;
+
+
+        String privateKeyPEM = keyOpt.get().getPrivateKey();
+        try {
+            String privateKeyContent = privateKeyPEM
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s", "");
+            byte[] decoded = Base64.getDecoder().decode(privateKeyContent);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePrivate(keySpec);
+        } catch (Exception e) {
+            log.error("Error obtaining the private key", e);
+            return null;
+        }
     }
 }

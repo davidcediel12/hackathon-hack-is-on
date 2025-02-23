@@ -1,9 +1,11 @@
-package com.hackathon.blockchain.service;
+package com.hackathon.blockchain.service.contract;
 
 import com.hackathon.blockchain.model.SmartContract;
 import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.repository.SmartContractRepository;
 import com.hackathon.blockchain.repository.TransactionRepository;
+import com.hackathon.blockchain.service.WalletKeyService;
+import com.hackathon.blockchain.service.WalletService;
 import com.hackathon.blockchain.utils.SignatureUtil;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.PublicKey;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class SmartContractEvaluationService {
@@ -74,7 +77,7 @@ public class SmartContractEvaluationService {
                 if (!verifyContractSignature(contract)) continue;
                 Expression exp = parser.parseExpression(contract.getConditionExpression());
                 Boolean conditionMet = exp.getValue(context, Boolean.class);
-                if (conditionMet != null && conditionMet) {
+                if (conditionMet != null && Objects.equals(Boolean.TRUE, conditionMet)) {
                     if ("CANCEL_TRANSACTION".equalsIgnoreCase(contract.getAction())) {
                         tx.setStatus("CANCELED");
                     } else if ("TRANSFER_FEE".equalsIgnoreCase(contract.getAction())) {
