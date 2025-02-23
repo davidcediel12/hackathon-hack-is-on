@@ -24,12 +24,14 @@ public class Block {
 
     private String previousHash;
 
-    Long timestamp;
+    private Long timestamp;
 
     private Long nonce;
 
+    @Column(unique = true, nullable = false)
     private String hash;
 
+    @Column(nullable = false)
     private Boolean isGenesis;
 
     @OneToMany(mappedBy = "block")
@@ -41,7 +43,7 @@ public class Block {
         return DigestUtils.sha256Hex(properties);
     }
 
-    public BlockDto toDto(){
+    public BlockDto toDto() {
         return new BlockDto(id, blockIndex, timestamp, previousHash, nonce, hash, isGenesis);
     }
 }
