@@ -1,5 +1,6 @@
 package com.hackathon.blockchain.model;
 
+import com.hackathon.blockchain.dto.response.BlockDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -38,5 +39,9 @@ public class Block {
     public String calculateHash() {
         String properties = blockIndex + previousHash + nonce + timestamp;
         return DigestUtils.sha256Hex(properties);
+    }
+
+    public BlockDto toDto(){
+        return new BlockDto(id, blockIndex, timestamp, previousHash, nonce, hash, isGenesis);
     }
 }

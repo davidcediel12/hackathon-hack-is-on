@@ -1,6 +1,7 @@
 package com.hackathon.blockchain.service;
 
 import com.hackathon.blockchain.dto.GenericResponse;
+import com.hackathon.blockchain.dto.response.BlockDto;
 import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.Block;
 import com.hackathon.blockchain.model.Transaction;
@@ -28,6 +29,7 @@ import static com.hackathon.blockchain.utils.MessageConstants.NO_BLOCKS_TO_MINE;
 @Slf4j
 public class BlockchainServiceImpl implements BlockchainService {
 
+    public static final String BLOCK_INDEX = "blockIndex";
     private final BlockRepository blockRepository;
     private final TransactionRepository transactionRepository;
 
@@ -43,7 +45,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     @Override
     public boolean isChainValid() {
-        List<Block> chain = blockRepository.findAll(Sort.by(Sort.Direction.ASC, "blockIndex"));
+        List<Block> chain = blockRepository.findAll(Sort.by(Sort.Direction.ASC, BLOCK_INDEX));
 
         for (int i = 1; i < chain.size(); i++) {
             Block current = chain.get(i);
@@ -72,12 +74,12 @@ public class BlockchainServiceImpl implements BlockchainService {
     public GenericResponse mineBlock() {
         List<Transaction> pendingTransactions = transactionRepository.findByStatus("PENDING");
 
-        if(pendingTransactions.isEmpty()) {
+        if (pendingTransactions.isEmpty()) {
             throw new ApiException(NO_BLOCKS_TO_MINE, HttpStatus.BAD_REQUEST);
         }
         Block previousBlock = blockRepository.findAll(
                         PageRequest.of(0, 1,
-                                Sort.by(Sort.Direction.DESC, "blockIndex")))
+                                Sort.by(Sort.Direction.DESC, BLOCK_INDEX)))
                 .get()
                 .findFirst()
                 .orElseThrow(() -> new ApiException("No blocks available", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -116,6 +118,14 @@ public class BlockchainServiceImpl implements BlockchainService {
                 .build();
 
         findHashAndSaveBlock(genesisBlock);
+    }
+
+    @Override
+    public List<BlockDto> getBlockchain() {
+        return blockRepository.findAll(Sort.by(Sort.Direction.ASC, BLOCK_INDEX))
+                .stream()
+                .map(Block::toDto)
+                .toList();
     }
 
 
