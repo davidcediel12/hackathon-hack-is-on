@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 
 import static com.hackathon.blockchain.utils.AssetConstants.USDT;
@@ -58,7 +59,6 @@ public class WalletService {
             if (existingWallet.isEmpty()) {
                 Wallet liquidityWallet = new Wallet();
                 liquidityWallet.setAddress(liquidityWalletAddress);
-                liquidityWallet.setAccountStatus(ACTIVE_STATUS);
                 liquidityWallet.setBalance(0.0);
                 liquidityWallet.setNetWorth(0.0);
                 walletRepository.save(liquidityWallet);
@@ -244,7 +244,7 @@ public class WalletService {
                 quantity,         // amount
                 price,            // pricePerUnit
                 type,             // type
-                new Date(),       // timestamp
+                OffsetDateTime.now(),       // timestamp
                 "PENDING",        // status
                 0.0,              // fee
                 null              // block (aún no asignado)
