@@ -29,6 +29,10 @@ public class SmartContract {
     private String digitalSignature;
     private String status;
 
+    public String getDataToSign(){
+        return name + conditionExpression + action + actionValue + issuerWalletId;
+    }
+
     public ContractResponse toResponse(){
         return new ContractResponse(name, conditionExpression,
                 action, actionValue, issuerWalletId, digitalSignature);

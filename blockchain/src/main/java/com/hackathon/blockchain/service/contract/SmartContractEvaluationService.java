@@ -45,11 +45,7 @@ public class SmartContractEvaluationService {
             if (issuerPublicKey == null) {
                 return false;
             }
-            String dataToSign = contract.getName() +
-                    contract.getConditionExpression() +
-                    contract.getAction() +
-                    contract.getActionValue() +
-                    contract.getIssuerWalletId();
+            String dataToSign = contract.getDataToSign();
             return SignatureUtil.verifySignature(dataToSign, contract.getDigitalSignature(), issuerPublicKey);
         } catch (Exception e) {
             e.printStackTrace();

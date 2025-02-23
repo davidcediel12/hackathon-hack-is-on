@@ -1,7 +1,5 @@
 package com.hackathon.blockchain.service.contract.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.blockchain.dto.GenericResponse;
 import com.hackathon.blockchain.dto.request.Contract;
 import com.hackathon.blockchain.dto.response.ContractResponse;
@@ -30,7 +28,6 @@ public class ContractServiceImpl implements ContractService {
 
     private final SmartContractRepository smartContractRepository;
     private final WalletKeyService walletKeyService;
-    private final ObjectMapper objectMapper;
 
     @Override
     public ContractResponse createContract(Contract contract) {
@@ -38,19 +35,20 @@ public class ContractServiceImpl implements ContractService {
 
         try {
             PrivateKey key = walletKeyService.getPrivateKeyForWallet(contract.issuerWalletId());
-            String digitalSignature = signContractData(contract, key);
 
             SmartContract smartContract = SmartContract.builder()
                     .action(contract.action())
                     .actionValue(contract.actionValue())
                     .conditionExpression(contract.conditionExpression())
-                    .digitalSignature(digitalSignature)
                     .issuerWalletId(contract.issuerWalletId())
                     .name(contract.name())
                     .status("ACTIVE")
                     .build();
 
+            smartContract.setDigitalSignature(signContractData(smartContract.getDataToSign(), key));
+
             smartContract = smartContractRepository.save(smartContract);
+
             return smartContract.toResponse();
 
         } catch (ApiException e) {
@@ -72,7 +70,7 @@ public class ContractServiceImpl implements ContractService {
                 .orElseThrow(() -> new ApiException("Contract not found", HttpStatus.NOT_FOUND));
 
         try {
-            String contractData = objectMapper.writeValueAsString(contract.toDto());
+            String dataToSign = contract.getDataToSign();
 
             PublicKey publicKey = walletKeyService.getPublicKeyForWallet(contract.getIssuerWalletId());
 
@@ -80,7 +78,7 @@ public class ContractServiceImpl implements ContractService {
                 throw new ApiException(WALLET_NOT_FOUND, HttpStatus.BAD_REQUEST);
             }
 
-            boolean isCorrect = SignatureUtil.verifySignature(contractData, contract.getDigitalSignature(), publicKey);
+            boolean isCorrect = SignatureUtil.verifySignature(dataToSign, contract.getDigitalSignature(), publicKey);
 
             if (isCorrect) {
                 return new GenericResponse("Smart contract is valid");
@@ -98,11 +96,9 @@ public class ContractServiceImpl implements ContractService {
 
     }
 
-    private String signContractData(Contract contract, PrivateKey key)
-            throws JsonProcessingException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private String signContractData(String dataToSign, PrivateKey key)
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 
-        String contractData;
-        contractData = objectMapper.writeValueAsString(contract);
 
         if (key == null) {
             throw new ApiException(WALLET_NOT_FOUND, HttpStatus.BAD_REQUEST);
@@ -110,7 +106,7 @@ public class ContractServiceImpl implements ContractService {
 
         Signature privateSignature = Signature.getInstance("SHA256withRSA");
         privateSignature.initSign(key);
-        privateSignature.update(contractData.getBytes(StandardCharsets.UTF_8));
+        privateSignature.update(dataToSign.getBytes(StandardCharsets.UTF_8));
 
         return Base64.getEncoder().encodeToString(privateSignature.sign());
     }
