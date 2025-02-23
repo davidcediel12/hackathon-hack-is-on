@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -36,12 +36,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void login(UserLogin login, HttpServletRequest request, HttpServletResponse response) {
-        try {
-            authenticateUser(login.username(), login.password(), request, response);
-        } catch (InternalAuthenticationServiceException e) {
-            log.warn("Invalid credentials", e);
-            throw new ApiException(e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
+
+        authenticateUser(login.username(), login.password(), request, response);
+
     }
 
 
@@ -65,18 +62,22 @@ public class AuthServiceImpl implements AuthService {
 
     private void authenticateUser(String username, String password,
                                   HttpServletRequest request, HttpServletResponse response) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    UsernamePasswordAuthenticationToken.unauthenticated(username, password));
 
-        Authentication authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(username, password));
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(authentication);
 
-        context.setAuthentication(authentication);
+            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+            securityContext.setAuthentication(authentication);
 
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(authentication);
-
-        securityContextRepository.saveContext(securityContext, request, response);
+            securityContextRepository.saveContext(securityContext, request, response);
+        } catch (AuthenticationServiceException e) {
+            log.warn("Invalid credentials", e);
+            throw new ApiException(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @Override
