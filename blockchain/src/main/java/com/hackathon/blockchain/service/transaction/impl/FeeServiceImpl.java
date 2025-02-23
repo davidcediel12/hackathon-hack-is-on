@@ -48,6 +48,7 @@ public class FeeServiceImpl implements FeeService {
         Wallet feeWallet = new Wallet();
         feeWallet.setAddress(feeWalletAddress);
         feeWallet.setBalance(0.0);
+        feeWallet.setNetWorth(0.0);
         feeWallet.setAccountStatus(ACTIVE_STATUS);
         // Al no estar asociada a un usuario, se deja user en null
         walletRepository.save(feeWallet);
