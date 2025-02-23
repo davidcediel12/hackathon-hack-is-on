@@ -23,6 +23,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class AuthConfig {
 
     private final ObjectMapper objectMapper;
