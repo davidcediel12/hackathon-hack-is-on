@@ -10,10 +10,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/wallet")
@@ -52,5 +51,11 @@ public class WalletController {
                                                      @Valid @RequestBody AssetOperationRequest sellRequest) {
 
         return ResponseEntity.ok(walletServiceAdapter.sellAsset(authentication.getName(), sellRequest));
+    }
+
+    @GetMapping("/balance")
+    public ResponseEntity<Map<String, Object>> getWalletBalance(Authentication authentication) {
+
+        return ResponseEntity.ok(walletServiceAdapter.getWalletBalance(authentication.getName()));
     }
 }

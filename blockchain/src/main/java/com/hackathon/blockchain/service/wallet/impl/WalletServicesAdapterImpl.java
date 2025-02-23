@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import static com.hackathon.blockchain.utils.WalletConstants.KEYS_FOLDER;
 
@@ -76,6 +77,13 @@ public class WalletServicesAdapterImpl implements WalletServiceAdapter {
         String message = walletService.sellAsset(user.getId(), purchaseRequest.symbol(), purchaseRequest.quantity());
 
         return new GenericResponse(message);
+    }
+
+    @Override
+    public Map<String, Object> getWalletBalance(String username) {
+        User user = getUser(username);
+
+        return walletService.getWalletBalance(user.getId());
     }
 
     private User getUser(String username) {
