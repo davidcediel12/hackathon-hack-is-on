@@ -11,9 +11,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class ApplicationControllerAdvice {
 
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<GenericResponse> handleApiException(ApiException apiException) {
-        return new ResponseEntity<>(
-                new GenericResponse(apiException.getMessage()),
-                apiException.getStatus());
+    public ResponseEntity<Object> handleApiException(ApiException apiException) {
+
+        if (apiException.getResponseBody() == null) {
+            return new ResponseEntity<>(
+                    new GenericResponse(apiException.getMessage()), apiException.getStatus());
+        }
+
+        return new ResponseEntity<>(apiException.getResponseBody(), apiException.getStatus());
+
     }
 }

@@ -11,6 +11,7 @@ import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -369,7 +370,9 @@ public class WalletService {
     public Map<String, List<Transaction>> getWalletTransactions(Long walletId) {
         Optional<Wallet> walletOpt = walletRepository.findById(walletId);
         if (walletOpt.isEmpty()) {
-            return Map.of("error", List.of()); // TODO Manage this error
+            throw new ApiException(WALLET_NOT_FOUND,
+                    Map.of("error", List.of()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
         Wallet wallet = walletOpt.get();
         List<Transaction> sentTransactions = transactionRepository.findBySenderWallet(wallet);
