@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static com.hackathon.blockchain.utils.AssetConstants.USDT;
+import static com.hackathon.blockchain.utils.MessageConstants.ASSET_PURCHASED_SUCCESSFULLY;
 import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
 import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 
@@ -105,7 +106,7 @@ public class WalletService {
             walletRepository.save(usdtLiquidityWallet);
 
             recordTransaction(usdtLiquidityWallet, userWallet, USDT, quantity, price, "BUY");
-            return "✅ USDT purchased successfully!";
+            return ASSET_PURCHASED_SUCCESSFULLY;
         }
 
         Optional<Asset> usdtAssetOpt = userWallet.getAssets().stream()
@@ -128,7 +129,7 @@ public class WalletService {
 
         recordTransaction(liquidityWallet, userWallet, symbol, quantity, price, "BUY");
 
-        return "✅ Asset purchased successfully!";
+        return ASSET_PURCHASED_SUCCESSFULLY;
     }
 
     /*

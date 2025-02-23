@@ -1,11 +1,15 @@
 package com.hackathon.blockchain.service;
 
+import com.hackathon.blockchain.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.Map;
+
+import static com.hackathon.blockchain.utils.MessageConstants.ASSET_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +24,13 @@ public class MarketDataService {
         return "Current price of " + symbol + ": $" + fetchLivePriceForAsset(symbol);
     }
     public double fetchLivePriceForAsset(String symbol) {
-        return fetchLiveMarketPrices().getOrDefault(symbol, 0.0d);
+        Double assetPrice = fetchLiveMarketPrices().get(symbol);
+
+        if(assetPrice == null) {
+            throw new ApiException(ASSET_NOT_FOUND + symbol, HttpStatus.NOT_FOUND);
+        }
+
+        return assetPrice;
     }
 
     public Map<String, Double> fetchLiveMarketPrices() {
