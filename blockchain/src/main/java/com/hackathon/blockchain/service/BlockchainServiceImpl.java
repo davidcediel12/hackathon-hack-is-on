@@ -1,12 +1,18 @@
 package com.hackathon.blockchain.service;
 
+import com.hackathon.blockchain.dto.GenericResponse;
 import com.hackathon.blockchain.model.Block;
 import com.hackathon.blockchain.repository.BlockRepository;
+import com.hackathon.blockchain.repository.TransactionRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -15,6 +21,17 @@ import java.util.List;
 public class BlockchainServiceImpl implements BlockchainService {
 
     private final BlockRepository blockRepository;
+    private final TransactionRepository transactionRepository;
+
+    @Value("${blockchain.difficulty.level}")
+    private Integer difficulty;
+
+    private String requiredPrefix;
+
+    @PostConstruct
+    public void init() {
+        requiredPrefix = "0".repeat(difficulty);
+    }
 
     @Override
     public boolean isChainValid() {
@@ -42,8 +59,42 @@ public class BlockchainServiceImpl implements BlockchainService {
         return true;
     }
 
+    @Override
+    public GenericResponse mineBlock() {
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public void createGenesisBlock() {
+        if(blockRepository.count() != 0) {
+            return;
+        }
+
+        Block genesisBlock = Block.builder()
+                .blockIndex(0L)
+                .timestamp(LocalDateTime.now())
+                .isGenesis(true)
+                .previousHash("0")
+                .build();
+
+        findHashAndSaveBlock(genesisBlock);
+    }
 
 
+    public void findHashAndSaveBlock(Block block) {
+
+        Long nonce = 0L;
+        String hash = "";
+        while (!hash.startsWith(requiredPrefix)){
+            block.setNonce(nonce);
+            hash = block.calculateHash();
+            nonce++;
+        }
+
+        block.setHash(hash);
+        blockRepository.save(block);
+    }
 
 
 

@@ -2,9 +2,8 @@ package com.hackathon.blockchain.model;
 
 import jakarta.persistence.*;
 import jdk.jfr.Timestamp;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -13,6 +12,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 public class Block {
 
     @Id
@@ -22,7 +23,7 @@ public class Block {
     private Long blockIndex;
 
 
-    private String previousBlockHash;
+    private String previousHash;
 
     @Timestamp
     LocalDateTime timestamp;
@@ -37,12 +38,8 @@ public class Block {
     Set<Transaction> transactions;
 
 
-    public String calculateHash(){
-        return ""; // TODO change
-    }
-
-    public String getPreviousHash() {
-
-        return null; // TODO change
+    public String calculateHash() {
+        String properties = blockIndex + previousHash + nonce + timestamp;
+        return DigestUtils.sha256Hex(properties);
     }
 }

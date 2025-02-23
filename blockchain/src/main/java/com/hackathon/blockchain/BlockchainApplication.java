@@ -1,5 +1,6 @@
 package com.hackathon.blockchain;
 
+import com.hackathon.blockchain.service.BlockchainService;
 import com.hackathon.blockchain.service.WalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
@@ -20,12 +21,13 @@ public class BlockchainApplication {
     }
 
     @Bean
-    public ApplicationRunner runner(WalletService walletService) {
+    public ApplicationRunner runner(WalletService walletService, BlockchainService blockchainService) {
 
         return appArgs -> {
             log.info("Initializing liquidity pools");
             walletService.initializeLiquidityPools(INITIAL_LIQUIDITY_POOL);
             log.info("Liquidity pool initialized");
+            blockchainService.createGenesisBlock();
         };
     }
 
