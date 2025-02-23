@@ -4,4 +4,6 @@ import com.hackathon.blockchain.model.SmartContract;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SmartContractRepository extends JpaRepository<SmartContract, Long> {
+
+    Boolean existsByIssuerWalletId(Long issuerWalletId);
 }

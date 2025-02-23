@@ -27,6 +27,7 @@ public class SmartContract {
     private Long issuerWalletId;
     @Lob
     private String digitalSignature;
+    private String status;
 
     public ContractResponse toResponse(){
         return new ContractResponse(name, conditionExpression,

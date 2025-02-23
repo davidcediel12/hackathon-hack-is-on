@@ -10,6 +10,7 @@ import com.hackathon.blockchain.model.SmartContract;
 import com.hackathon.blockchain.repository.SmartContractRepository;
 import com.hackathon.blockchain.service.WalletKeyService;
 import com.hackathon.blockchain.service.contract.ContractService;
+import com.hackathon.blockchain.utils.SignatureUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,7 @@ public class ContractServiceImpl implements ContractService {
                     .digitalSignature(digitalSignature)
                     .issuerWalletId(contract.issuerWalletId())
                     .name(contract.name())
+                    .status("ACTIVE")
                     .build();
 
             smartContract = smartContractRepository.save(smartContract);
@@ -78,14 +80,7 @@ public class ContractServiceImpl implements ContractService {
                 throw new ApiException(WALLET_NOT_FOUND, HttpStatus.BAD_REQUEST);
             }
 
-            Signature publicSignature = Signature.getInstance("SHA256withRSA");
-            publicSignature.initVerify(publicKey);
-            publicSignature.update(contractData.getBytes(StandardCharsets.UTF_8));
-
-
-            byte[] signature = Base64.getDecoder().decode(contract.getDigitalSignature());
-
-            boolean isCorrect = publicSignature.verify(signature);
+            boolean isCorrect = SignatureUtil.verifySignature(contractData, contract.getDigitalSignature(), publicKey);
 
             if (isCorrect) {
                 return new GenericResponse("Smart contract is valid");
