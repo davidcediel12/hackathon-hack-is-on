@@ -31,7 +31,7 @@ public class AuthConfig {
 
         http.authorizeHttpRequests(requests ->
                         requests.requestMatchers("/auth/register", "/auth/login", "/health",
-                                        "/market/**", "/blockchain/**").permitAll()
+                                        "/market/**", "/blockchain/**", "/contracts/validate/**").permitAll()
                                 .requestMatchers("/auth/logout").authenticated()
                                 .anyRequest().authenticated())
                 .logout(logout ->
