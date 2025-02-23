@@ -16,10 +16,10 @@ public class AssetConstants {
 
 
     public static final Map<String, Double> INITIAL_LIQUIDITY_POOL = Map.of(
-            BTC, 20.0,
-            ETH, 40.0,
+            BTC, 100000.0,
+            ETH, 400000.0,
             USDT, 1000000.0,
-            NCOIN, 100000.0,
-            CCOIN, 20000.0
+            NCOIN, 10000000.0,
+            CCOIN, 2000000.0
     );
 }
