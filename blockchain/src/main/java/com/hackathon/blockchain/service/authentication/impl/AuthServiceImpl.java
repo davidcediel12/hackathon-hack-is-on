@@ -8,8 +8,6 @@ import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.User;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.service.authentication.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,8 +15,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
@@ -37,18 +33,24 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void login(UserLogin login, HttpServletRequest request, HttpServletResponse response) {
+    public void login(UserLogin login) {
 
-        authenticateUser(login.username(), login.password(), request, response);
+        authenticateUser(login.username(), login.password());
 
     }
 
 
     @Transactional
     @Override
-    public void registerUser(UserRegistration userRegistration, HttpServletRequest request, HttpServletResponse response) {
+    public void registerUser(UserRegistration userRegistration) {
+
+
+        if (userRepository.existsByUsername(userRegistration.username())) {
+            throw new ApiException(null, HttpStatus.BAD_REQUEST);
+        }
 
         String encodedPassword = passwordEncoder.encode(userRegistration.password());
+
 
         User user = User.builder()
                 .email(userRegistration.email())
@@ -58,24 +60,14 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        authenticateUser(user.getUsername(), userRegistration.password(), request, response);
+        authenticateUser(user.getUsername(), userRegistration.password());
     }
 
 
-    private void authenticateUser(String username, String password,
-                                  HttpServletRequest request, HttpServletResponse response) {
+    private void authenticateUser(String username, String password) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken.unauthenticated(username, password));
-
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-
-            context.setAuthentication(authentication);
-
-            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-            securityContext.setAuthentication(authentication);
-
-            securityContextRepository.saveContext(securityContext, request, response);
         } catch (AuthenticationException e) {
             log.warn("Invalid credentials", e);
             throw new ApiException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
