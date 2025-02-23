@@ -8,12 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -30,19 +28,13 @@ public class AuthConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests(requests ->
                         requests.requestMatchers("/auth/register", "/auth/login", "/health",
                                         "/market/**", "/blockchain/**").permitAll()
                                 .requestMatchers("/auth/logout").authenticated()
                                 .anyRequest().authenticated())
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session ->
-                        session
-                                .sessionFixation().migrateSession()
-                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                .maximumSessions(1))
                 .logout(logout ->
                         logout
                                 .permitAll(false)
@@ -51,11 +43,7 @@ public class AuthConfig {
                                 .logoutSuccessHandler(customLogoutSuccessHandler())
                                 .clearAuthentication(true)
                 )
-                .httpBasic(Customizer.withDefaults());
-
-
-        http.securityContext(securityContext ->
-                securityContext.securityContextRepository(new HttpSessionSecurityContextRepository()));
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
