@@ -4,6 +4,7 @@ import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.model.WalletKey;
 import com.hackathon.blockchain.repository.WalletKeyRepository;
 import com.hackathon.blockchain.utils.PemUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,20 +22,12 @@ import static com.hackathon.blockchain.utils.WalletConstants.KEYS_FOLDER;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class WalletKeyService {
 
 
     private final WalletKeyRepository walletKeyRepository;
 
-    public WalletKeyService(WalletKeyRepository walletKeyRepository) {
-        this.walletKeyRepository = walletKeyRepository;
-        // Asegurarse de que la carpeta /keys exista
-        File dir = new File(KEYS_FOLDER);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        log.debug("Directorio de claves: {}", dir.getAbsolutePath());
-    }
 
     public Optional<WalletKey> getKeysByWallet(Wallet wallet) {
         return walletKeyRepository.findByWallet(wallet);
@@ -53,6 +46,12 @@ public class WalletKeyService {
         // Convertir las claves a formato PEM
         String publicKeyPEM = PemUtil.toPEMFormat(keyPair.getPublic());
         String privateKeyPEM = PemUtil.toPEMFormat(keyPair.getPrivate());
+
+        File dir = new File(KEYS_FOLDER);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        log.debug("Directorio de claves: {}", dir.getAbsolutePath());
 
         // Guardar las claves en archivos dentro de la carpeta /keys
         Path privateKeyPath = Path.of(KEYS_FOLDER, "wallet_" + wallet.getId() + "_private.pem");
