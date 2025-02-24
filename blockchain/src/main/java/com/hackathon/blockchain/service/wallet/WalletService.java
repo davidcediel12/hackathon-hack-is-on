@@ -188,8 +188,7 @@ public class WalletService {
         Optional<Wallet> walletOpt = walletRepository.findById(walletId);
         if (walletOpt.isEmpty()) {
             throw new ApiException(WALLET_NOT_FOUND,
-                    Map.of("error", List.of()),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+                    Map.of("error", "Wallet not found"), HttpStatus.NOT_FOUND);
         }
         Wallet wallet = walletOpt.get();
         List<Transaction> sentTransactions = transactionRepository.findBySenderWallet(wallet);
