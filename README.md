@@ -6,6 +6,11 @@
 
 ---
 
+## Obtained Results
+
+![image info](./assets/final_score.png)
+---
+
 ## 🌐 Background
 
 In this challenge you will build a Java backend application that simulates a simplified blockchain and cryptocurrency trading platform. The app includes user authentication, wallet management, transaction processing, live market data fetching, blockchain simulation (with mining and chain validation), digital key generation, and the implementation of Smart Contracts with digital signing.
