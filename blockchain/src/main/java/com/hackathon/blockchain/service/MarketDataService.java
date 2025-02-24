@@ -27,7 +27,7 @@ public class MarketDataService {
         Double assetPrice = fetchLiveMarketPrices().get(symbol);
 
         if(assetPrice == null) {
-            throw new ApiException(ASSET_NOT_FOUND + symbol, HttpStatus.NOT_FOUND);
+            throw new ApiException(ASSET_NOT_FOUND + symbol, HttpStatus.BAD_REQUEST);
         }
 
         return assetPrice;
