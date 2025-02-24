@@ -151,7 +151,7 @@ public class WalletService {
         Optional<Wallet> optionalWallet = walletRepository.findByUserId(userId);
 
         if (optionalWallet.isEmpty()) {
-            throw new ApiException(WALLET_NOT_FOUND, Map.of("error", "Wallet not found"), HttpStatus.OK);
+            throw new ApiException(WALLET_NOT_FOUND, Map.of("error", "Wallet not found"), HttpStatus.NOT_FOUND);
         }
 
         Wallet wallet = optionalWallet.get();
