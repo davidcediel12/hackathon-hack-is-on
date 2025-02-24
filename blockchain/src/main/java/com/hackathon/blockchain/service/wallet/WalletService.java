@@ -79,7 +79,7 @@ public class WalletService {
         Wallet wallet = new Wallet();
         wallet.setUser(user);
         wallet.setAddress(generateWalletAddress());
-        double initialAmount = 100000.0;
+        double initialAmount = 10000.0;
         wallet.setBalance(initialAmount);
         wallet.setNetWorth(initialAmount);
         wallet.setAccountStatus(ACTIVE_STATUS);
