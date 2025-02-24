@@ -2,11 +2,9 @@ package com.hackathon.blockchain.service.wallet;
 
 import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.Asset;
-import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.model.User;
 import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.repository.AssetRepository;
-import com.hackathon.blockchain.repository.TransactionRepository;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import com.hackathon.blockchain.service.MarketDataService;
@@ -14,7 +12,6 @@ import com.hackathon.blockchain.service.WalletKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +20,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
 import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 
 @Slf4j
@@ -32,7 +28,6 @@ import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 public class WalletService {
 
     private final WalletRepository walletRepository;
-    private final TransactionRepository transactionRepository;
     private final MarketDataService marketDataService;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
