@@ -8,7 +8,6 @@ import com.hackathon.blockchain.repository.AssetRepository;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import com.hackathon.blockchain.service.MarketDataService;
-import com.hackathon.blockchain.service.WalletKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;

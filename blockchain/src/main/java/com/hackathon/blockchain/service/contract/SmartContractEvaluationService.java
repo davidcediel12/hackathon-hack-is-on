@@ -6,8 +6,8 @@ import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.repository.SmartContractRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
-import com.hackathon.blockchain.service.WalletKeyService;
 import com.hackathon.blockchain.service.transaction.FeeService;
+import com.hackathon.blockchain.service.wallet.WalletKeyService;
 import com.hackathon.blockchain.utils.SignatureUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class SmartContractEvaluationService {
 
     public static final String ACTIVE_STATUS = "ACTIVE";
     private final SmartContractRepository smartContractRepository;
-    private final WalletKeyService walletKeyService; // Para obtener la clave pública del emisor
+    private final WalletKeyService walletKeyService;
     private final FeeService feeService;
     private final SpelExpressionParser parser = new SpelExpressionParser();
     private final WalletRepository walletRepository;

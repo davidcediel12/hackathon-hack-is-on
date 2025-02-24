@@ -1,8 +1,9 @@
-package com.hackathon.blockchain.service;
+package com.hackathon.blockchain.service.wallet.impl;
 
 import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.model.WalletKey;
 import com.hackathon.blockchain.repository.WalletKeyRepository;
+import com.hackathon.blockchain.service.wallet.WalletKeyService;
 import com.hackathon.blockchain.utils.PemUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +24,12 @@ import static com.hackathon.blockchain.utils.WalletConstants.KEYS_FOLDER;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WalletKeyService {
+public class WalletKeyServiceImpl implements WalletKeyService {
 
 
     private final WalletKeyRepository walletKeyRepository;
 
-
+    @Override
     public Optional<WalletKey> getKeysByWallet(Wallet wallet) {
         return walletKeyRepository.findByWallet(wallet);
     }
@@ -37,6 +38,7 @@ public class WalletKeyService {
      * Genera un par de claves RSA de 2048 bits, las convierte a PEM y las almacena en archivos,
      * además de guardarlas en la base de datos vinculadas a la wallet.
      */
+    @Override
     public WalletKey generateAndStoreKeys(Wallet wallet) throws NoSuchAlgorithmException, IOException {
         // Generar el par de claves
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -72,7 +74,10 @@ public class WalletKeyService {
         return walletKeyRepository.save(walletKey);
     }
 
-    // Método para obtener la clave pública de una wallet (en formato PublicKey)
+    /**
+     * Método para obtener la clave pública de una wallet (en formato PublicKey)
+     */
+    @Override
     public PublicKey getPublicKeyForWallet(Long walletId) {
         Optional<WalletKey> keyOpt = walletKeyRepository.findByWalletId(walletId);
 
@@ -102,6 +107,7 @@ public class WalletKeyService {
     /**
      * Devuelve la clave privada asociada a la wallet.
      */
+    @Override
     public PrivateKey getPrivateKeyForWallet(Long walletId) {
         Optional<WalletKey> keyOpt = walletKeyRepository.findByWalletId(walletId);
 
