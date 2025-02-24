@@ -10,6 +10,7 @@ import com.hackathon.blockchain.repository.TransactionRepository;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import com.hackathon.blockchain.service.MarketDataService;
+import com.hackathon.blockchain.service.WalletKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -18,6 +19,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
@@ -33,6 +36,7 @@ public class WalletService {
     private final MarketDataService marketDataService;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
+    private final WalletKeyService walletKeyService;
 
 
     public Optional<Wallet> getWalletByAddress(String address) {
@@ -40,7 +44,7 @@ public class WalletService {
     }
 
     @Transactional
-    public void initializeLiquidityPools(Map<String, Double> initialAssets) {
+    public void initializeLiquidityPools(Map<String, Double> initialAssets) throws NoSuchAlgorithmException, IOException {
 
         for (Map.Entry<String, Double> entry : initialAssets.entrySet()) {
             String symbol = entry.getKey();
@@ -49,18 +53,24 @@ public class WalletService {
             String liquidityWalletAddress = "LP-" + symbol;
             Optional<Wallet> existingWallet = walletRepository.findByAddress(liquidityWalletAddress);
 
+            Wallet savedWallet;
+
             if (existingWallet.isEmpty()) {
                 Wallet liquidityWallet = new Wallet();
                 liquidityWallet.setAddress(liquidityWalletAddress);
                 liquidityWallet.setBalance(0.0);
                 liquidityWallet.setNetWorth(0.0);
-                walletRepository.save(liquidityWallet);
+                savedWallet = walletRepository.save(liquidityWallet);
 
                 Asset asset = new Asset(null, symbol, initialQuantity, 0.0, liquidityWallet);
                 assetRepository.save(asset);
 
                 liquidityWallet.getAssets().add(asset);
+            } else {
+                savedWallet = existingWallet.get();
             }
+
+            walletKeyService.generateAndStoreKeys(savedWallet);
         }
     }
 

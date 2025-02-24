@@ -4,9 +4,9 @@ import com.hackathon.blockchain.dto.request.Contract;
 import com.hackathon.blockchain.repository.SmartContractRepository;
 import com.hackathon.blockchain.service.BlockchainService;
 import com.hackathon.blockchain.service.WalletKeyService;
-import com.hackathon.blockchain.service.wallet.WalletService;
 import com.hackathon.blockchain.service.contract.ContractService;
 import com.hackathon.blockchain.service.transaction.FeeService;
+import com.hackathon.blockchain.service.wallet.WalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -37,20 +37,17 @@ public class BlockchainApplication {
 
         return appArgs -> {
             log.info("Initializing liquidity pools");
-            walletService.initializeLiquidityPools(INITIAL_LIQUIDITY_POOL);
+
+            try {
+                walletService.initializeLiquidityPools(INITIAL_LIQUIDITY_POOL);
+            } catch (Exception e) {
+                log.error("Error creating the key for BTC wallet", e);
+            }
             log.info(feeService.createFeeWallet());
             log.info("Liquidity pool initialized");
             blockchainService.createGenesisBlock();
 
             walletService.getWalletByAddress("LP-BTC").ifPresent(wallet -> {
-                try {
-                    if (walletKeyService.getKeysByWallet(wallet).isEmpty()) {
-                        walletKeyService.generateAndStoreKeys(wallet);
-                    }
-                } catch (Exception e) {
-                    log.error("Error creating the key for BTC wallet", e);
-                }
-
                 Boolean contractAlreadyExists = smartContractRepository.existsByIssuerWalletId(wallet.getId());
 
                 if (Boolean.TRUE.equals(contractAlreadyExists)) {
