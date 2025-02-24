@@ -12,6 +12,7 @@ import com.hackathon.blockchain.service.WalletKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
 import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 
 @Slf4j
@@ -149,7 +151,7 @@ public class WalletService {
         Optional<Wallet> optionalWallet = walletRepository.findByUserId(userId);
 
         if (optionalWallet.isEmpty()) {
-            return Map.of("error", "Wallet not found");
+            throw new ApiException(WALLET_NOT_FOUND, Map.of("error", "Wallet not found"), HttpStatus.NOT_FOUND);
         }
 
         Wallet wallet = optionalWallet.get();

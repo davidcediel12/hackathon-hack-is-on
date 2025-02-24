@@ -50,7 +50,7 @@ public class WalletController {
     }
 
 
-//    @PostMapping("/sell")
+    @PostMapping("/sell")
     public ResponseEntity<GenericResponse> sellAsset(Authentication authentication,
                                                      @Valid @RequestBody AssetOperationRequest sellRequest) {
 
