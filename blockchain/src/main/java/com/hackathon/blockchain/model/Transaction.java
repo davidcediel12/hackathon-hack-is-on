@@ -1,11 +1,13 @@
 package com.hackathon.blockchain.model;
 
 import com.hackathon.blockchain.dto.response.TransactionDto;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
 @NoArgsConstructor
@@ -30,9 +32,7 @@ public class Transaction {
     private Double pricePerUnit;
     private String type;
 
-    @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;
+    private Instant timestamp;
 
     private String status;
     private Double fee;
