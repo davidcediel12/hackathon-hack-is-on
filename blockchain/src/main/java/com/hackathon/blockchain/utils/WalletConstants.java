@@ -7,5 +7,5 @@ public class WalletConstants {
     private WalletConstants() {
     }
 
-    public static final String KEYS_FOLDER = "keys";
+    public static final String KEYS_FOLDER = "abs/path/to/keys";
 }
