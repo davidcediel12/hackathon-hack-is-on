@@ -57,7 +57,7 @@ public class WalletController {
         return ResponseEntity.ok(walletServiceAdapter.sellAsset(authentication.getName(), sellRequest));
     }
 
-    @GetMapping("/balance")
+//    @GetMapping("/balance")
     public ResponseEntity<Map<String, Object>> getWalletBalance(Authentication authentication) {
 
         return ResponseEntity.ok(walletServiceAdapter.getWalletBalance(authentication.getName()));
