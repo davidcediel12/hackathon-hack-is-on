@@ -147,27 +147,8 @@ public class TransactionServiceImpl implements TransactionService {
             updateWalletAssets(liquidityWallet, symbol, quantity, price);
 
         } else {
-            // CASO 2: Venta de otros assets (Recibo USDT)
-            Optional<Wallet> usdtLiquidityWalletOpt = walletRepository.findByAddress("LP-USDT");
-            if (usdtLiquidityWalletOpt.isEmpty()) {
-                return "❌ USDT liquidity pool not found!";
-            }
-            Wallet usdtLiquidityWallet = usdtLiquidityWalletOpt.get();
-
-            Optional<Asset> usdtAssetOpt = usdtLiquidityWallet.getAssets().stream()
-                    .filter(a -> a.getSymbol().equals(USDT))
-                    .findFirst();
-
-            if (usdtAssetOpt.isEmpty() || usdtAssetOpt.get().getQuantity() < totalRevenue) {
-                return "❌ Not enough USDT in liquidity pool!";
-            }
-
-            updateWalletAssets(userWallet, USDT, totalRevenue, price);
-            updateWalletAssets(userWallet, symbol, -quantity, price);
-            updateWalletAssets(usdtLiquidityWallet, USDT, -totalRevenue, price);
-            updateWalletAssets(liquidityWallet, symbol, quantity, price);
-
-            walletRepository.save(usdtLiquidityWallet);
+            String sellError = sellAsset(symbol, quantity, totalRevenue, userWallet, price, liquidityWallet);
+            if (sellError != null) return sellError;
         }
 
         recordTransaction(userWallet, liquidityWallet, symbol, quantity, price, SELL_TYPE);
@@ -176,6 +157,32 @@ public class TransactionServiceImpl implements TransactionService {
         walletRepository.save(liquidityWallet);
 
         return "✅ Asset sold successfully!";
+    }
+
+
+    private String sellAsset(String symbol, double quantity, double totalRevenue, Wallet userWallet, double price, Wallet liquidityWallet) {
+        // CASO 2: Venta de otros assets (Recibo USDT)
+        Optional<Wallet> usdtLiquidityWalletOpt = walletRepository.findByAddress("LP-USDT");
+        if (usdtLiquidityWalletOpt.isEmpty()) {
+            return "❌ USDT liquidity pool not found!";
+        }
+        Wallet usdtLiquidityWallet = usdtLiquidityWalletOpt.get();
+
+        Optional<Asset> usdtAssetOpt = usdtLiquidityWallet.getAssets().stream()
+                .filter(a -> a.getSymbol().equals(USDT))
+                .findFirst();
+
+        if (usdtAssetOpt.isEmpty() || usdtAssetOpt.get().getQuantity() < totalRevenue) {
+            return "❌ Not enough USDT in liquidity pool!";
+        }
+
+        updateWalletAssets(userWallet, USDT, totalRevenue, price);
+        updateWalletAssets(userWallet, symbol, -quantity, price);
+        updateWalletAssets(usdtLiquidityWallet, USDT, -totalRevenue, price);
+        updateWalletAssets(liquidityWallet, symbol, quantity, price);
+
+        walletRepository.save(usdtLiquidityWallet);
+        return null;
     }
 
 
