@@ -66,12 +66,15 @@ public class WalletService {
                 assetRepository.save(asset);
 
                 liquidityWallet.getAssets().add(asset);
+
+                log.info("New liquidity pool wallet and asset for {} saved", symbol);
             } else {
                 savedWallet = existingWallet.get();
             }
 
             if (walletKeyService.getKeysByWallet(savedWallet).isEmpty()) {
                 walletKeyService.generateAndStoreKeys(savedWallet);
+                log.info("Wallet key for LP-{} created", symbol);
             }
         }
     }
