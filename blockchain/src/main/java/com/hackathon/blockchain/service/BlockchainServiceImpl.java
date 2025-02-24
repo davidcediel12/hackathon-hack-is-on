@@ -93,10 +93,11 @@ public class BlockchainServiceImpl implements BlockchainService {
                 .transactions(new HashSet<>(pendingTransactions))
                 .build();
 
-        findHashAndSaveBlock(newBlock);
+        Block block = findHashAndSaveBlock(newBlock);
 
         for (Transaction transaction : pendingTransactions) {
             transaction.setStatus("MINED");
+            transaction.setBlock(block);
         }
         transactionRepository.saveAll(pendingTransactions);
 
@@ -129,7 +130,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
 
-    public void findHashAndSaveBlock(Block block) {
+    public Block findHashAndSaveBlock(Block block) {
 
         Long nonce = 0L;
         String hash = "";
@@ -140,7 +141,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         }
 
         block.setHash(hash);
-        blockRepository.save(block);
+        return blockRepository.save(block);
     }
 
 
