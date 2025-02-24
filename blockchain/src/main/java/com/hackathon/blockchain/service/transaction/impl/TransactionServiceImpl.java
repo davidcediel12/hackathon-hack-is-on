@@ -1,6 +1,5 @@
 package com.hackathon.blockchain.service.transaction.impl;
 
-import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.Asset;
 import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.model.Wallet;
@@ -11,7 +10,6 @@ import com.hackathon.blockchain.service.MarketDataService;
 import com.hackathon.blockchain.service.contract.SmartContractEvaluationService;
 import com.hackathon.blockchain.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,17 +56,15 @@ public class TransactionServiceImpl implements TransactionService {
         double totalCost = quantity * price;
 
         if (symbol.equals(USDT)) {
-            purchaseUsdt(quantity, userWallet, totalCost, price, usdtLiquidityWallet);
-        } else {
-            purchaseAsset(symbol, quantity, totalCost, userWallet, price, usdtLiquidityWallet, liquidityWallet);
+            return purchaseUsdt(quantity, userWallet, totalCost, price, usdtLiquidityWallet);
         }
+        return purchaseAsset(symbol, quantity, totalCost, userWallet, price, usdtLiquidityWallet, liquidityWallet);
 
-        return ASSET_PURCHASED_SUCCESSFULLY;
     }
 
-    private void purchaseAsset(String symbol, double quantity,
-                               double totalCost, Wallet userWallet, double price,
-                               Wallet usdtLiquidityWallet, Wallet liquidityWallet) {
+    private String purchaseAsset(String symbol, double quantity,
+                                 double totalCost, Wallet userWallet, double price,
+                                 Wallet usdtLiquidityWallet, Wallet liquidityWallet) {
 
         Optional<Asset> usdtAssetOpt = userWallet.getAssets().stream()
                 .filter(a -> a.getSymbol().equals(USDT))
@@ -76,7 +72,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 
         if (usdtAssetOpt.isEmpty() || usdtAssetOpt.get().getQuantity() < totalCost) {
-            throw new ApiException("❌ Insufficient USDT balance! You must buy USDT first.", HttpStatus.BAD_REQUEST);
+            return "❌ Insufficient USDT balance! You must buy USDT first.";
         }
 
         updateWalletAssets(userWallet, USDT, -totalCost, price);
@@ -90,13 +86,14 @@ public class TransactionServiceImpl implements TransactionService {
         walletRepository.save(usdtLiquidityWallet);
 
         recordTransaction(liquidityWallet, userWallet, symbol, quantity, price, "BUY");
+        return ASSET_PURCHASED_SUCCESSFULLY;
     }
 
-    private void purchaseUsdt(double quantity, Wallet userWallet,
-                              double totalCost, double price, Wallet usdtLiquidityWallet) {
+    private String purchaseUsdt(double quantity, Wallet userWallet,
+                                double totalCost, double price, Wallet usdtLiquidityWallet) {
 
         if (userWallet.getBalance() < totalCost) {
-            throw new ApiException("❌ Insufficient fiat balance to buy USDT!", HttpStatus.BAD_REQUEST);
+            return "❌ Insufficient fiat balance to buy USDT!";
         }
 
         userWallet.setBalance(userWallet.getBalance() - totalCost);
@@ -107,6 +104,7 @@ public class TransactionServiceImpl implements TransactionService {
         walletRepository.save(usdtLiquidityWallet);
 
         recordTransaction(usdtLiquidityWallet, userWallet, USDT, quantity, price, "BUY");
+        return "✅ USDT purchased successfully!";
     }
 
     /*
@@ -133,13 +131,13 @@ public class TransactionServiceImpl implements TransactionService {
                 .findFirst();
 
         if (existingAsset.isEmpty() || existingAsset.get().getQuantity() < quantity) {
-            throw new ApiException("❌ Not enough assets to sell!", HttpStatus.BAD_REQUEST);
+            return "❌ Not enough assets to sell!";
         }
 
         // CASO 1: Venta de USDT (Recibo dinero fiat)
         if (symbol.equals(USDT)) {
             if (liquidityWallet.getAssets().stream().anyMatch(a -> a.getSymbol().equals(USDT) && a.getQuantity() < quantity)) {
-                throw new ApiException("❌ Not enough USDT liquidity!", HttpStatus.BAD_REQUEST);
+                return "❌ Not enough USDT liquidity!";
             }
 
             userWallet.setBalance(userWallet.getBalance() + totalRevenue);
@@ -150,7 +148,7 @@ public class TransactionServiceImpl implements TransactionService {
             // CASO 2: Venta de otros assets (Recibo USDT)
             Optional<Wallet> usdtLiquidityWalletOpt = walletRepository.findByAddress("LP-USDT");
             if (usdtLiquidityWalletOpt.isEmpty()) {
-                throw new ApiException("❌ USDT liquidity pool not found!", HttpStatus.INTERNAL_SERVER_ERROR);
+                return "❌ USDT liquidity pool not found!";
             }
             Wallet usdtLiquidityWallet = usdtLiquidityWalletOpt.get();
 
@@ -159,7 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .findFirst();
 
             if (usdtAssetOpt.isEmpty() || usdtAssetOpt.get().getQuantity() < totalRevenue) {
-                throw new ApiException("❌ Not enough USDT in liquidity pool!", HttpStatus.INTERNAL_SERVER_ERROR);
+                return "❌ Not enough USDT in liquidity pool!";
             }
 
             updateWalletAssets(userWallet, USDT, totalRevenue, price);
