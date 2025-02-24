@@ -54,12 +54,11 @@ public class SmartContractEvaluationService {
 
     @Transactional
     public void evaluateSmartContracts(Transaction transaction, String liquidityPoolAddress) {
-        Long walletId = walletRepository.findByAddress(liquidityPoolAddress)
+        Long walletId = walletRepository.findByAddressIgnoreCase(liquidityPoolAddress)
                 .map(Wallet::getId)
                 .orElse(0L);
 
-        List<SmartContract> contracts = smartContractRepository.findByStatusAndIssuerWalletId(
-                ACTIVE_STATUS, walletId);
+        List<SmartContract> contracts = smartContractRepository.findByIssuerWalletId(walletId);
 
         StandardEvaluationContext context = new StandardEvaluationContext();
         context.setVariable("amount", transaction.getAmount());

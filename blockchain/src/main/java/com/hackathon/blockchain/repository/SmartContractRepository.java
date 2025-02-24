@@ -9,5 +9,5 @@ public interface SmartContractRepository extends JpaRepository<SmartContract, Lo
 
     Boolean existsByIssuerWalletId(Long issuerWalletId);
 
-    List<SmartContract> findByStatusAndIssuerWalletId(String status, Long issuerWalletId);
+    List<SmartContract> findByIssuerWalletId(Long issuerWalletId);
 }

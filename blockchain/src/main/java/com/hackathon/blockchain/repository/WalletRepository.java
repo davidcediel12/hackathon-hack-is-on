@@ -9,6 +9,8 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
     Optional<Wallet> findByAddress(String address);
 
+    Optional<Wallet> findByAddressIgnoreCase(String address);
+
     Optional<Wallet> findByUserId(Long userId);
 
     Optional<Wallet> findByUser_Username(String userUsername);
