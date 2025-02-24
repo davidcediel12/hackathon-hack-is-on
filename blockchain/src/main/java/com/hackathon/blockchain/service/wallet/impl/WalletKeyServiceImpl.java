@@ -75,7 +75,10 @@ public class WalletKeyServiceImpl implements WalletKeyService {
     }
 
     /**
+     *
      * Método para obtener la clave pública de una wallet (en formato PublicKey)
+     * @param walletId wallet identifier
+     * @return public key of the wallet
      */
     @Override
     public PublicKey getPublicKeyForWallet(Long walletId) {
