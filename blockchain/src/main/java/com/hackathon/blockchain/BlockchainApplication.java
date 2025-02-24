@@ -3,7 +3,6 @@ package com.hackathon.blockchain;
 import com.hackathon.blockchain.dto.request.Contract;
 import com.hackathon.blockchain.repository.SmartContractRepository;
 import com.hackathon.blockchain.service.BlockchainService;
-import com.hackathon.blockchain.service.WalletKeyService;
 import com.hackathon.blockchain.service.contract.ContractService;
 import com.hackathon.blockchain.service.transaction.FeeService;
 import com.hackathon.blockchain.service.wallet.WalletService;
@@ -30,7 +29,6 @@ public class BlockchainApplication {
     @Transactional
     public ApplicationRunner runner(WalletService walletService,
                                     BlockchainService blockchainService,
-                                    WalletKeyService walletKeyService,
                                     ContractService contractService,
                                     SmartContractRepository smartContractRepository,
                                     FeeService feeService) {

@@ -5,7 +5,6 @@ import com.hackathon.blockchain.model.SmartContract;
 import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.repository.SmartContractRepository;
-import com.hackathon.blockchain.repository.TransactionRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import com.hackathon.blockchain.service.WalletKeyService;
 import com.hackathon.blockchain.service.transaction.FeeService;
@@ -23,9 +22,6 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Objects;
 
-import static com.hackathon.blockchain.utils.TransactionConstants.BUY_TYPE;
-import static com.hackathon.blockchain.utils.TransactionConstants.SELL_TYPE;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -33,7 +29,6 @@ public class SmartContractEvaluationService {
 
     public static final String ACTIVE_STATUS = "ACTIVE";
     private final SmartContractRepository smartContractRepository;
-    private final TransactionRepository transactionRepository;
     private final WalletKeyService walletKeyService; // Para obtener la clave pública del emisor
     private final FeeService feeService;
     private final SpelExpressionParser parser = new SpelExpressionParser();
