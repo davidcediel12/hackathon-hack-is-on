@@ -181,6 +181,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void updateWalletAssets(Wallet wallet, String assetSymbol, double amount,
                                     double purchasedPrice) {
+
         Optional<Asset> assetOpt = wallet.getAssets().stream()
                 .filter(asset -> asset.getSymbol().equalsIgnoreCase(assetSymbol))
                 .findFirst();
@@ -218,19 +219,17 @@ public class TransactionServiceImpl implements TransactionService {
     private void recordTransaction(Wallet sender, Wallet receiver, String assetSymbol,
                                    double quantity, double price, String type) {
 
-        Transaction transaction = new Transaction(
-                null,             // id (se genera automáticamente)
-                sender,           // senderWallet
-                receiver,         // receiverWallet
-                assetSymbol,      // assetSymbol
-                quantity,         // amount
-                price,            // pricePerUnit
-                type,             // type
-                OffsetDateTime.now(),       // timestamp
-                "PENDING",        // status
-                0.0,              // fee
-                null              // block (aún no asignado)
-        );
+        Transaction transaction = Transaction.builder()
+                .senderWallet(sender)
+                .receiverWallet(receiver)
+                .assetSymbol(assetSymbol)
+                .amount(quantity)
+                .pricePerUnit(price)
+                .type(type)
+                .timestamp(OffsetDateTime.now())
+                .status("PENDING")
+                .fee(0.0)
+                .build();
 
         smartContractEvaluationService.evaluateSmartContracts(transaction, "LP-" + assetSymbol);
         transactionRepository.save(transaction);
