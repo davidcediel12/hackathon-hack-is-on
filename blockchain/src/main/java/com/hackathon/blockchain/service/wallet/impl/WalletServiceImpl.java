@@ -88,7 +88,7 @@ public class WalletServiceImpl implements WalletService {
         Optional<Wallet> existingWallet = walletRepository.findByUserId(user.getId());
 
         if (existingWallet.isPresent()) {
-            return "❌ You already have a wallet created.";
+            throw new ApiException("❌ You already have a wallet created.", HttpStatus.NOT_FOUND);
         }
 
         Wallet wallet = new Wallet();
