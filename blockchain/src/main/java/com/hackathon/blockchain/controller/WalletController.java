@@ -42,7 +42,7 @@ public class WalletController {
     }
 
 
-//    @PostMapping("/buy")
+    @PostMapping("/buy")
     public ResponseEntity<GenericResponse> buyAsset(Authentication authentication,
                                                     @Valid @RequestBody AssetOperationRequest purchaseRequest) {
 
@@ -50,7 +50,7 @@ public class WalletController {
     }
 
 
-    @PostMapping("/sell")
+//    @PostMapping("/sell")
     public ResponseEntity<GenericResponse> sellAsset(Authentication authentication,
                                                      @Valid @RequestBody AssetOperationRequest sellRequest) {
 
