@@ -63,7 +63,7 @@ public class WalletController {
         return ResponseEntity.ok(walletServiceAdapter.getWalletBalance(authentication.getName()));
     }
 
-//    @GetMapping("/transactions")
+    @GetMapping("/transactions")
     public ResponseEntity<TransactionsDto> getTransactions(Authentication authentication) {
         return ResponseEntity.ok(transactionHistoryService.getTransactions(authentication.getName()));
     }
