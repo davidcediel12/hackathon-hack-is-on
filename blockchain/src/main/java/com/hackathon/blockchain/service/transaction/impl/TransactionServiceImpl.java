@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 
 import static com.hackathon.blockchain.utils.AssetConstants.USDT;
@@ -238,7 +238,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .amount(quantity)
                 .pricePerUnit(price)
                 .type(type)
-                .timestamp(Instant.now())
+                .timestamp(new Date())
                 .status("PENDING")
                 .fee(0.0)
                 .build();

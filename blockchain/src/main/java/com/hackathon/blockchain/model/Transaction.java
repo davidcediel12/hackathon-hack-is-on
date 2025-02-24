@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
 
-import java.time.Instant;
+import java.util.Date;
 
 @Entity
 @NoArgsConstructor
@@ -32,7 +32,7 @@ public class Transaction {
     private Double pricePerUnit;
     private String type;
 
-    private Instant timestamp;
+    private Date timestamp;
 
     private String status;
     private Double fee;
