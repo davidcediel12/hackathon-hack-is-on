@@ -70,7 +70,9 @@ public class WalletService {
                 savedWallet = existingWallet.get();
             }
 
-            walletKeyService.generateAndStoreKeys(savedWallet);
+            if (walletKeyService.getKeysByWallet(savedWallet).isEmpty()) {
+                walletKeyService.generateAndStoreKeys(savedWallet);
+            }
         }
     }
 
