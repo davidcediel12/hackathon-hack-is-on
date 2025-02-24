@@ -178,23 +178,4 @@ public class WalletService {
 
         return walletInfo;
     }
-
-    /**
-     * Devuelve un mapa con dos listas de transacciones:
-     * - "sent": transacciones enviadas (donde la wallet es remitente)
-     * - "received": transacciones recibidas (donde la wallet es destinataria)
-     */
-    public Map<String, List<Transaction>> getWalletTransactions(Long walletId) {
-        Optional<Wallet> walletOpt = walletRepository.findById(walletId);
-        if (walletOpt.isEmpty()) {
-            throw new ApiException(WALLET_NOT_FOUND, Map.of("error", List.of()), HttpStatus.OK);
-        }
-        Wallet wallet = walletOpt.get();
-        List<Transaction> sentTransactions = transactionRepository.findBySenderWallet(wallet);
-        List<Transaction> receivedTransactions = transactionRepository.findByReceiverWallet(wallet);
-        Map<String, List<Transaction>> result = new HashMap<>();
-        result.put("sent", sentTransactions);
-        result.put("received", receivedTransactions);
-        return result;
-    }
 }
