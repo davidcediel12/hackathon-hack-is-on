@@ -65,7 +65,7 @@ public class TransactionHistoryServiceImpl implements TransactionHistoryService 
     private Map<String, List<Transaction>> getWalletTransactions(Long walletId) {
         Optional<Wallet> walletOpt = walletRepository.findById(walletId);
         if (walletOpt.isEmpty()) {
-            throw new ApiException(WALLET_NOT_FOUND, Map.of("error", List.of()), HttpStatus.OK);
+            throw new ApiException(WALLET_NOT_FOUND, Map.of("error", List.of()), HttpStatus.NOT_FOUND);
         }
         Wallet wallet = walletOpt.get();
         List<Transaction> sentTransactions = transactionRepository.findBySenderWallet(wallet);
