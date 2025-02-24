@@ -27,7 +27,6 @@ import java.util.Objects;
 @Slf4j
 public class SmartContractEvaluationService {
 
-    public static final String ACTIVE_STATUS = "ACTIVE";
     private final SmartContractRepository smartContractRepository;
     private final WalletKeyService walletKeyService;
     private final FeeService feeService;
