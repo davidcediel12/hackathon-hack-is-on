@@ -30,6 +30,40 @@ class AuthenticationControllerTest {
     @MockitoBean
     AuthService authService;
 
+
+    @Test
+    void shouldReturnBadRequestWhenBodyIsNotProvided() throws Exception {
+
+        doNothing().when(authService).registerUser(any(), any(), any());
+
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUsernameIsNotProvided() throws Exception {
+
+        UserRegistration userRegistration = new UserRegistration("foo@f.com", null, "baz");
+        validateBadCall(userRegistration);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenPasswordIsNotProvided() throws Exception {
+
+        UserRegistration userRegistration = new UserRegistration("foo@f.com", "bar", null);
+        validateBadCall(userRegistration);
+    }
+
+
+    private void validateBadCall(UserRegistration userRegistration) throws Exception {
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRegistration)))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test
     void shouldCreateUser() throws Exception {
 
