@@ -1,5 +1,6 @@
 package com.hackathon.blockchain.model;
 
+import com.hackathon.blockchain.dto.response.TransactionDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -45,6 +46,11 @@ public class Transaction {
     private Block block;
 
 
+    public TransactionDto toDto() {
+
+        return new TransactionDto(id, assetSymbol, amount, pricePerUnit, type,
+                timestamp, status, fee, senderWallet.getId(), receiverWallet.getId());
+    }
 
 
 }

@@ -10,7 +10,7 @@ import com.hackathon.blockchain.model.WalletKey;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import com.hackathon.blockchain.service.WalletKeyService;
-import com.hackathon.blockchain.service.WalletService;
+import com.hackathon.blockchain.service.wallet.WalletService;
 import com.hackathon.blockchain.service.wallet.WalletServiceAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -4,7 +4,7 @@ import com.hackathon.blockchain.dto.request.Contract;
 import com.hackathon.blockchain.repository.SmartContractRepository;
 import com.hackathon.blockchain.service.BlockchainService;
 import com.hackathon.blockchain.service.WalletKeyService;
-import com.hackathon.blockchain.service.WalletService;
+import com.hackathon.blockchain.service.wallet.WalletService;
 import com.hackathon.blockchain.service.contract.ContractService;
 import com.hackathon.blockchain.service.transaction.FeeService;
 import lombok.extern.slf4j.Slf4j;

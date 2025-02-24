@@ -6,8 +6,8 @@ import com.hackathon.blockchain.dto.response.TransactionsDto;
 import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.repository.WalletRepository;
-import com.hackathon.blockchain.service.WalletService;
-import com.hackathon.blockchain.service.transaction.TransactionAdapterService;
+import com.hackathon.blockchain.service.wallet.WalletService;
+import com.hackathon.blockchain.service.transaction.TransactionHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class TransactionAdapterServiceImpl implements TransactionAdapterService {
+public class TransactionHistoryServiceImpl implements TransactionHistoryService {
 
     private final WalletService walletService;
     private final WalletRepository walletRepository;
@@ -45,16 +45,9 @@ public class TransactionAdapterServiceImpl implements TransactionAdapterService 
     private List<TransactionDto> toDto(List<Transaction> transactions) {
 
         return transactions.stream()
-                .map(this::toDto)
+                .map(Transaction::toDto)
                 .toList();
     }
 
 
-    private TransactionDto toDto(Transaction transaction) {
-
-        return new TransactionDto(transaction.getId(), transaction.getAssetSymbol(),
-                transaction.getAmount(), transaction.getPricePerUnit(), transaction.getType(),
-                transaction.getTimestamp(), transaction.getStatus(), transaction.getFee(),
-                transaction.getSenderWallet().getId(), transaction.getReceiverWallet().getId());
-    }
 }

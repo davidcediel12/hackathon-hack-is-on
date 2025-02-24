@@ -5,8 +5,8 @@ import com.hackathon.blockchain.dto.GenericResponse;
 import com.hackathon.blockchain.dto.request.AssetOperationRequest;
 import com.hackathon.blockchain.dto.response.TransactionsDto;
 import com.hackathon.blockchain.dto.response.WalletKeyGenerationResponse;
-import com.hackathon.blockchain.service.WalletService;
-import com.hackathon.blockchain.service.transaction.TransactionAdapterService;
+import com.hackathon.blockchain.service.wallet.WalletService;
+import com.hackathon.blockchain.service.transaction.TransactionHistoryService;
 import com.hackathon.blockchain.service.wallet.WalletServiceAdapter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class WalletController {
 
     private final WalletService walletService;
     private final WalletServiceAdapter walletServiceAdapter;
-    private final TransactionAdapterService transactionAdapterService;
+    private final TransactionHistoryService transactionHistoryService;
 
 
     @PostMapping("/create")
@@ -65,6 +65,6 @@ public class WalletController {
 
     @GetMapping("/transactions")
     public ResponseEntity<TransactionsDto> getTransactions(Authentication authentication) {
-        return ResponseEntity.ok(transactionAdapterService.getTransactions(authentication.getName()));
+        return ResponseEntity.ok(transactionHistoryService.getTransactions(authentication.getName()));
     }
 }
