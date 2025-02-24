@@ -68,6 +68,8 @@ public class TransactionServiceImpl implements TransactionService {
                                  double totalCost, Wallet userWallet, double price,
                                  Wallet usdtLiquidityWallet, Wallet liquidityWallet) {
 
+        symbol = symbol.toUpperCase();
+
         Optional<Asset> usdtAssetOpt = userWallet.getAssets().stream()
                 .filter(a -> a.getSymbol().equals(USDT))
                 .findFirst();
@@ -116,6 +118,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     @Override
     public String sellAsset(Long userId, String symbol, double quantity) {
+
+        symbol = symbol.toUpperCase();
         Optional<Wallet> optionalWallet = walletRepository.findByUserId(userId);
         Optional<Wallet> liquidityWalletOpt = walletRepository.findByAddress("LP-" + symbol);
 
@@ -128,8 +132,9 @@ public class TransactionServiceImpl implements TransactionService {
         double price = marketDataService.fetchLivePriceForAsset(symbol);
         double totalRevenue = quantity * price;
 
+        String finalSymbol = symbol;
         Optional<Asset> existingAsset = userWallet.getAssets().stream()
-                .filter(a -> a.getSymbol().equals(symbol))
+                .filter(a -> a.getSymbol().equals(finalSymbol))
                 .findFirst();
 
         if (existingAsset.isEmpty() || existingAsset.get().getQuantity() < quantity) {
