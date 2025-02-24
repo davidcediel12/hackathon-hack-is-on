@@ -187,8 +187,7 @@ public class WalletService {
     public Map<String, List<Transaction>> getWalletTransactions(Long walletId) {
         Optional<Wallet> walletOpt = walletRepository.findById(walletId);
         if (walletOpt.isEmpty()) {
-            throw new ApiException(WALLET_NOT_FOUND,
-                    Map.of("error", "Wallet not found"), HttpStatus.NOT_FOUND);
+            throw new ApiException(WALLET_NOT_FOUND, Map.of("error", List.of()), HttpStatus.OK);
         }
         Wallet wallet = walletOpt.get();
         List<Transaction> sentTransactions = transactionRepository.findBySenderWallet(wallet);
@@ -198,9 +197,4 @@ public class WalletService {
         result.put("received", receivedTransactions);
         return result;
     }
-
-    // RETO BACKEND
-
-    // Método para transferir el fee: deducirlo del wallet del emisor y sumarlo a la wallet de fees.
-
 }
