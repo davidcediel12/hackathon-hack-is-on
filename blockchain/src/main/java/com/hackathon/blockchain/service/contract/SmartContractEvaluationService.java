@@ -3,8 +3,10 @@ package com.hackathon.blockchain.service.contract;
 import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.SmartContract;
 import com.hackathon.blockchain.model.Transaction;
+import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.repository.SmartContractRepository;
 import com.hackathon.blockchain.repository.TransactionRepository;
+import com.hackathon.blockchain.repository.WalletRepository;
 import com.hackathon.blockchain.service.WalletKeyService;
 import com.hackathon.blockchain.service.transaction.FeeService;
 import com.hackathon.blockchain.utils.SignatureUtil;
@@ -21,6 +23,9 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Objects;
 
+import static com.hackathon.blockchain.utils.TransactionConstants.BUY_TYPE;
+import static com.hackathon.blockchain.utils.TransactionConstants.SELL_TYPE;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +37,7 @@ public class SmartContractEvaluationService {
     private final WalletKeyService walletKeyService; // Para obtener la clave pública del emisor
     private final FeeService feeService;
     private final SpelExpressionParser parser = new SpelExpressionParser();
+    private final WalletRepository walletRepository;
 
 
     /**
@@ -52,11 +58,13 @@ public class SmartContractEvaluationService {
     }
 
     @Transactional
-    public void evaluateSmartContracts(Transaction transaction) {
+    public void evaluateSmartContracts(Transaction transaction, String liquidityPoolAddress) {
+        Long walletId = walletRepository.findByAddress(liquidityPoolAddress)
+                .map(Wallet::getId)
+                .orElse(0L);
 
         List<SmartContract> contracts = smartContractRepository.findByStatusAndIssuerWalletId(
-                ACTIVE_STATUS, transaction.getSenderWallet().getId());
-
+                ACTIVE_STATUS, walletId);
 
         StandardEvaluationContext context = new StandardEvaluationContext();
         context.setVariable("amount", transaction.getAmount());

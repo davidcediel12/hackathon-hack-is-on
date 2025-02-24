@@ -19,6 +19,8 @@ import java.util.Optional;
 import static com.hackathon.blockchain.utils.AssetConstants.USDT;
 import static com.hackathon.blockchain.utils.MessageConstants.ASSET_PURCHASED_SUCCESSFULLY;
 import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
+import static com.hackathon.blockchain.utils.TransactionConstants.BUY_TYPE;
+import static com.hackathon.blockchain.utils.TransactionConstants.SELL_TYPE;
 
 
 @Service
@@ -85,7 +87,7 @@ public class TransactionServiceImpl implements TransactionService {
         walletRepository.save(liquidityWallet);
         walletRepository.save(usdtLiquidityWallet);
 
-        recordTransaction(liquidityWallet, userWallet, symbol, quantity, price, "BUY");
+        recordTransaction(liquidityWallet, userWallet, symbol, quantity, price, BUY_TYPE);
         return ASSET_PURCHASED_SUCCESSFULLY;
     }
 
@@ -103,7 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
         walletRepository.save(userWallet);
         walletRepository.save(usdtLiquidityWallet);
 
-        recordTransaction(usdtLiquidityWallet, userWallet, USDT, quantity, price, "BUY");
+        recordTransaction(usdtLiquidityWallet, userWallet, USDT, quantity, price, BUY_TYPE);
         return "✅ USDT purchased successfully!";
     }
 
@@ -168,7 +170,7 @@ public class TransactionServiceImpl implements TransactionService {
             walletRepository.save(usdtLiquidityWallet);
         }
 
-        recordTransaction(userWallet, liquidityWallet, symbol, quantity, price, "SELL");
+        recordTransaction(userWallet, liquidityWallet, symbol, quantity, price, SELL_TYPE);
 
         walletRepository.save(userWallet);
         walletRepository.save(liquidityWallet);
@@ -213,7 +215,9 @@ public class TransactionServiceImpl implements TransactionService {
                 (asset.getQuantity() + amount);
     }
 
-    private void recordTransaction(Wallet sender, Wallet receiver, String assetSymbol, double quantity, double price, String type) {
+    private void recordTransaction(Wallet sender, Wallet receiver, String assetSymbol,
+                                   double quantity, double price, String type) {
+
         Transaction transaction = new Transaction(
                 null,             // id (se genera automáticamente)
                 sender,           // senderWallet
@@ -228,7 +232,7 @@ public class TransactionServiceImpl implements TransactionService {
                 null              // block (aún no asignado)
         );
 
-        smartContractEvaluationService.evaluateSmartContracts(transaction);
+        smartContractEvaluationService.evaluateSmartContracts(transaction, "LP-" + assetSymbol);
         transactionRepository.save(transaction);
     }
 }
