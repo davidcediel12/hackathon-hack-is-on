@@ -23,7 +23,7 @@ public class MarketController {
         return ResponseEntity.ok(marketDataService.fetchLiveMarketPrices());
     }
 
-    @GetMapping("/prices/{symbol}")
+    @GetMapping("/price/{symbol}")
     public ResponseEntity<GenericResponse> getMarketPrice(@PathVariable String symbol) {
         return ResponseEntity.ok(new GenericResponse(marketDataService.getMarketPrice(symbol)));
     }
