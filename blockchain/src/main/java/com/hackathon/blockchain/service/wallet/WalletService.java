@@ -2,11 +2,9 @@ package com.hackathon.blockchain.service.wallet;
 
 import com.hackathon.blockchain.exception.ApiException;
 import com.hackathon.blockchain.model.Asset;
-import com.hackathon.blockchain.model.Transaction;
 import com.hackathon.blockchain.model.User;
 import com.hackathon.blockchain.model.Wallet;
 import com.hackathon.blockchain.repository.AssetRepository;
-import com.hackathon.blockchain.repository.TransactionRepository;
 import com.hackathon.blockchain.repository.UserRepository;
 import com.hackathon.blockchain.repository.WalletRepository;
 import com.hackathon.blockchain.service.MarketDataService;
@@ -14,7 +12,6 @@ import com.hackathon.blockchain.service.WalletKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +20,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-import static com.hackathon.blockchain.utils.MessageConstants.WALLET_NOT_FOUND;
 import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 
 @Slf4j
@@ -32,7 +28,6 @@ import static com.hackathon.blockchain.utils.WalletConstants.ACTIVE_STATUS;
 public class WalletService {
 
     private final WalletRepository walletRepository;
-    private final TransactionRepository transactionRepository;
     private final MarketDataService marketDataService;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
@@ -56,10 +51,13 @@ public class WalletService {
             Wallet savedWallet;
 
             if (existingWallet.isEmpty()) {
-                Wallet liquidityWallet = new Wallet();
-                liquidityWallet.setAddress(liquidityWalletAddress);
-                liquidityWallet.setBalance(0.0);
-                liquidityWallet.setNetWorth(0.0);
+
+                Wallet liquidityWallet = Wallet.builder()
+                        .address(liquidityWalletAddress)
+                        .balance(0.0)
+                        .netWorth(0.0)
+                        .build();
+
                 savedWallet = walletRepository.save(liquidityWallet);
 
                 Asset asset = new Asset(null, symbol, initialQuantity, 0.0, liquidityWallet);
@@ -91,13 +89,15 @@ public class WalletService {
             return "❌ You already have a wallet created.";
         }
 
-        Wallet wallet = new Wallet();
-        wallet.setUser(user);
-        wallet.setAddress(generateWalletAddress());
         double initialAmount = 100000.0;
-        wallet.setBalance(initialAmount);
-        wallet.setNetWorth(initialAmount);
-        wallet.setAccountStatus(ACTIVE_STATUS);
+
+        Wallet wallet = Wallet.builder()
+                .user(user)
+                .address(generateWalletAddress())
+                .balance(initialAmount)
+                .netWorth(initialAmount)
+                .accountStatus(ACTIVE_STATUS)
+                .build();
 
         walletRepository.save(wallet);
 
@@ -170,12 +170,10 @@ public class WalletService {
             netWorth += assetValue;
         }
 
-        Map<String, Object> walletInfo = new HashMap<>();
-        walletInfo.put("wallet_address", wallet.getAddress());
-        walletInfo.put("cash_balance", wallet.getBalance());
-        walletInfo.put("net_worth", netWorth);
-        walletInfo.put("assets", assetsMap);
-
-        return walletInfo;
+        return Map.of(
+                "wallet_address", wallet.getAddress(),
+                "cash_balance", wallet.getBalance(),
+                "net_worth", netWorth,
+                "assets", assetsMap);
     }
 }
